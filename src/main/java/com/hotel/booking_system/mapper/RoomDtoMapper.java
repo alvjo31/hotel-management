@@ -12,6 +12,8 @@ public class RoomDtoMapper implements Function<Room, RoomDto> {
         return new RoomDto(room.getNumber(), room.getCapacity(), room.getPrice());
     }
 
+
+
     public Room fromDto(RoomDto roomDto) {
         Room room = new Room();
         room.setNumber(roomDto.getNumber());

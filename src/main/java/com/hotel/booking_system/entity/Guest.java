@@ -25,12 +25,12 @@ public class Guest {
     private String email;
     private Integer phone;
 
-    @OneToMany(mappedBy = "booking" , cascade = CascadeType.ALL , orphanRemoval = true)
+    @OneToMany(mappedBy = "guest" , cascade = CascadeType.ALL , orphanRemoval = true)
     @Builder.Default
     private List<Booking> bookings = new ArrayList<>();
 
 
-    @OneToMany(mappedBy = "review" , cascade = CascadeType.ALL , orphanRemoval = true)
+    @OneToMany(mappedBy = "guest" , cascade = CascadeType.ALL , orphanRemoval = true)
     @Builder.Default
     private List<Review> reviews = new ArrayList<>();
 }
