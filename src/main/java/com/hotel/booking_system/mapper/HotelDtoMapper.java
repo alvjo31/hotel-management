@@ -32,4 +32,5 @@ public class HotelDtoMapper implements Function<Hotel, HotelDto> {
         hotel.setUpdatedDate(hotelDto.getUpdatedDate());
         return hotel;
     }
+
 }

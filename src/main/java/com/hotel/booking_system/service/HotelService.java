@@ -12,7 +12,6 @@ import java.util.Optional;
 @Service
 public class HotelService {
     private final HotelRepository hotelRepository;
-
     private final HotelDtoMapper hotelDtoMapper;
 
     @Autowired
@@ -41,6 +40,52 @@ public class HotelService {
                         "Hotel me emrin '" + hotelName + "' nuk u gjet."
                 ));
     }
+
+
+    public HotelDto addHotel(HotelDto hotelDto) {
+        validationHotelNameDto(hotelDto);
+        hotelNameIsUnique(hotelDto.getHotelName());
+
+        Hotel hotel = hotelDtoMapper.fromDto(hotelDto);
+        Hotel savedHotel = hotelRepository.save(hotel);
+        return hotelDtoMapper.apply(hotel);
+    }
+
+
+    // si fillim validon qe emri mos te jete bosh
+    public void validationHotelNameDto(HotelDto hotelDto) {
+        if (hotelDto.getHotelName() == null || hotelDto.getHotelName().trim().isEmpty()) {
+            throw new RuntimeException("Emri i hotelit eshte i detyrueshem");
+        }
+        // validon qe qyteti mos te jete bosh
+        if (hotelDto.getHotelCity() == null || hotelDto.getHotelCity().trim().isEmpty()) {
+            throw new RuntimeException("Qyteti i hotelit eshte i detyrueshem");
+        }
+    }
+
+    // kontrollon qe emri mos te jete i perseritur
+    public void hotelNameIsUnique(String hotelName) {
+        Optional<Hotel> existedHotel = hotelRepository.getHotelByName(hotelName);
+        if (existedHotel.isPresent()) {
+            throw new RuntimeException("Hotel me emrin '" + hotelName + "' tashmë ekziston");
+        }
+    }
+
+    public HotelDto updateHotel(HotelDto hotelDto) {
+        validationHotelNameDto(hotelDto);
+
+        Hotel updatedHotel = hotelDtoMapper.fromDto(hotelDto);
+        Hotel updateHotel = hotelRepository.save(updatedHotel);
+        return hotelDtoMapper.apply(updateHotel);
+    }
+
+    public void deleteHotel(int id) {
+        if (!hotelRepository.existsById(id)) {
+            throw new RuntimeException("Hotel me ID " + id + " nuk ekziston.");
+        }
+        hotelRepository.deleteById(id);
+    }
+
 }
 
 
