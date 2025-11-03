@@ -1,13 +1,18 @@
 package com.hotel.booking_system.repository;
 
 import com.hotel.booking_system.entity.Hotel;
+import com.hotel.booking_system.entity.Room;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface HotelRepository extends JpaRepository<Hotel, Integer> {
-    Optional<Hotel> getHotelByName(String hotelName);
+    Optional<Hotel> getByHotelName(String hotelName);
+    List<Hotel>  getByHotelCity(String hotelCity);
+
+
 
 }

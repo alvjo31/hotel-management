@@ -7,6 +7,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class GuestService {
     @Autowired
-    private GuestRepository guestRepository;
+    private GuestRepository  guestRepository;
 
 }

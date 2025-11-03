@@ -7,7 +7,10 @@ import com.hotel.booking_system.repository.HotelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class HotelService {
@@ -27,14 +30,14 @@ public class HotelService {
     }
 
     public HotelDto getHotelByName(String hotelName) {
-        Optional<Hotel> hotelByName = hotelRepository.getHotelByName(hotelName);
+        Optional<Hotel> hotelByName = hotelRepository.getByHotelName(hotelName);
 
         // if (hotelByName.isPresent()) {
         //   return hotelDtoMapper.apply(hotelByName.get());
         // }else
         //   throw new RuntimeException("Hotel me emrin '" + hotelName + "' nuk u gjet.");
 
-        return hotelRepository.getHotelByName(hotelName)
+        return hotelRepository.getByHotelName(hotelName)
                 .map(hotelDtoMapper)
                 .orElseThrow(() -> new RuntimeException(
                         "Hotel me emrin '" + hotelName + "' nuk u gjet."
@@ -65,11 +68,12 @@ public class HotelService {
 
     // kontrollon qe emri mos te jete i perseritur
     public void hotelNameIsUnique(String hotelName) {
-        Optional<Hotel> existedHotel = hotelRepository.getHotelByName(hotelName);
-        if (existedHotel.isPresent()) {
-            throw new RuntimeException("Hotel me emrin '" + hotelName + "' tashmë ekziston");
-        }
+        hotelRepository.getByHotelName(hotelName)
+                .ifPresent(hotel -> {
+                    throw new RuntimeException("Hotel me emrin '" + hotelName + "' tashmë ekziston");
+                });
     }
+
 
     public HotelDto updateHotel(HotelDto hotelDto) {
         validationHotelNameDto(hotelDto);
@@ -84,6 +88,20 @@ public class HotelService {
             throw new RuntimeException("Hotel me ID " + id + " nuk ekziston.");
         }
         hotelRepository.deleteById(id);
+    }
+
+    public List<HotelDto> getAllHotels(String hotelName) {
+        return hotelRepository.findAll()
+                .stream()
+                .map(hotelDtoMapper)
+                .toList();
+    }
+
+    public List<HotelDto> getHotelsByCity(String hotelCity) {
+        return hotelRepository.getByHotelCity(hotelCity)
+                .stream()
+                .map(hotelDtoMapper)
+                .toList();
     }
 
 }
