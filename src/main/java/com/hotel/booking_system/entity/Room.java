@@ -21,6 +21,9 @@ public class Room {
     private Integer capacity;
     private Double price;
     private Enum status;
+    private int maxGuests;
+    @Column(nullable = false)
+    private double pricePerNight; // Çmimi për natën për dhomën
 
     @ManyToOne
     @JoinColumn(name = "hotel_id")
@@ -29,4 +32,16 @@ public class Room {
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Booking> bookings = new ArrayList<>();
+
+    public int getMaxGuests() {
+        return maxGuests;
+    }
+
+    public int getPricePerNight(){
+        return price.intValue();
+    }
+
+    public void setPricePerNight(double pricePerNight){
+        this.pricePerNight = pricePerNight;
+    }
 }

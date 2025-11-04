@@ -1,9 +1,6 @@
 package com.hotel.booking_system.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,6 +19,8 @@ public class Guest {
     private Integer id;
     private String firstName;
     private String lastName;
+
+    @Column(unique = true ,nullable = false , length = 100)
     private String email;
     private Integer phone;
 
