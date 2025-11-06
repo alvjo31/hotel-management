@@ -1,4 +1,4 @@
-package com.hotel.booking_system.entity;
+package com.hotel.booking_system.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -16,11 +16,17 @@ import java.util.List;
 @Data
 public class Room {
     @Id
-    private String id;
+    @Column(nullable = false)
+    private Integer id;
+    @Column(nullable = false)
     private Integer number;
+    @Column(nullable = false)
     private Integer capacity;
+    @Column(nullable = false)
     private Double price;
+    @Column(nullable = false)
     private Enum status;
+    @Column(nullable = false)
     private int maxGuests;
     @Column(nullable = false)
     private double pricePerNight; // Çmimi për natën për dhomën
@@ -37,7 +43,13 @@ public class Room {
         return maxGuests;
     }
 
+
+    //Nëse atributi price është një Double, duhet të jeni të sigurt se price.intValue() është përdorur saktë. Nëse ndonjëherë price është null
+    // , mund të shkaktoni një NullPointerException. Një mundësi është që të kontrolloni që price nuk është null:
     public int getPricePerNight(){
+        if (price == null) {
+            throw new IllegalArgumentException("Price cannot be null.");
+        }
         return price.intValue();
     }
 

@@ -1,8 +1,8 @@
 package com.hotel.booking_system.service;
 
 import com.hotel.booking_system.dto.BookingDto;
-import com.hotel.booking_system.entity.Booking;
-import com.hotel.booking_system.entity.Room;
+import com.hotel.booking_system.model.Booking;
+import com.hotel.booking_system.model.Room;
 import com.hotel.booking_system.enums.BookingStatus;
 import com.hotel.booking_system.mapper.BookingDtoMapper;
 import com.hotel.booking_system.repository.BookingRepository;
@@ -39,7 +39,11 @@ public class BookingService {
         validateBookingStatus(booking); // Kontrollo statusin e rezervimit
 
         // Llogarit çmimin e rezervimit
-        Room room = roomRepository.findById(bookingDto.getRoomId());
+        Optional<Booking> optionalBooking = bookingRepository.findById(bookingDto.getRoomId());
+
+        Room room = roomRepository.findById(bookingDto.getRoomId())
+                .orElseThrow(() -> new IllegalArgumentException("Room not found with ID: " + bookingDto.getRoomId()));
+
         long numberOfNights = java.time.temporal.ChronoUnit.DAYS.between(bookingDto.getCheckInDate(), bookingDto.getCheckOutDate());
         double price = calculatePrice(room, bookingDto.getNumberOfGuests(), numberOfNights);
 
@@ -57,9 +61,10 @@ public class BookingService {
 
     }
 
+
     // Find bookings for the room that overlap with the given check-in and check-out dates
-    public boolean isRoomAvailable(String roomId, LocalDate checkInDate, LocalDate checkOutDate) {
-        List<Booking> overlappingBookings = bookingRepository.findOverlappingBookings(roomId, checkInDate, checkOutDate);
+    public boolean isRoomAvailable(Integer roomId, LocalDate checkInDate, LocalDate checkOutDate) {
+        List<Booking> overlappingBookings = bookingRepository.findByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan(roomId, checkInDate, checkOutDate);
 
         // If there are any overlapping bookings, the room is not available
         return overlappingBookings.isEmpty();
@@ -80,9 +85,12 @@ public class BookingService {
         }
     }
 
-    public void validateRoomCapacity(String roomId, int numberOfGuests) {
-        Room room = roomRepository.findById(roomId);
-        if (room.getMaxGuests() < numberOfGuests) {
+    public void validateRoomCapacity(Integer roomId, int numberOfGuests) {
+        Optional<Room> room = roomRepository.findById(roomId);
+        if (!room.isPresent()) {
+            throw new IllegalArgumentException("Room with ID " + roomId + " not found.");
+        }
+        if (room.get().getMaxGuests() < numberOfGuests) {
             throw new IllegalArgumentException("Room capacity exceeded.");
         }
     }
@@ -104,5 +112,22 @@ public class BookingService {
         return optionalBooking.map(bookingDtoMapper).orElse(null);
     }
 
+    public BookingDto updateBookingDto(BookingDto bookingDto) {
+        Booking booking = bookingDtoMapper.fromDto(bookingDto);
+        Booking saved = bookingRepository.save(booking);
+        return bookingDtoMapper.apply(saved);
+    }
+
+    public void deleteBookingDtoById(int id) {
+        if (!bookingRepository.existsById(id)) {
+            throw new RuntimeException("Booking me ID " + id + " nuk ekziston.");
+        }
+        bookingRepository.deleteById(id);
+    }
+
+    public BookingDto findBookingDtoById(int id) {
+        Optional<Booking> optionalBooking = bookingRepository.findById(id);
+        return bookingDtoMapper.apply(optionalBooking.get());
+    }
 
 }

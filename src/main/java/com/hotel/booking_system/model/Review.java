@@ -1,4 +1,4 @@
-package com.hotel.booking_system.entity;
+package com.hotel.booking_system.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.yaml.snakeyaml.DumperOptions;
 
 import java.util.Date;
 

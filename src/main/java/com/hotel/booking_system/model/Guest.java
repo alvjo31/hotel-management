@@ -1,4 +1,4 @@
-package com.hotel.booking_system.entity;
+package com.hotel.booking_system.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

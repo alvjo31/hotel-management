@@ -1,17 +1,14 @@
 package com.hotel.booking_system.service;
 
-import com.hotel.booking_system.dto.HotelDto;
 import com.hotel.booking_system.dto.RoomDto;
-import com.hotel.booking_system.entity.Room;
+import com.hotel.booking_system.model.Room;
 import com.hotel.booking_system.mapper.RoomDtoMapper;
 import com.hotel.booking_system.repository.RoomRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service

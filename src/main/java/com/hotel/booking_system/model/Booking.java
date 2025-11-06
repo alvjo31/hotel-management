@@ -1,4 +1,4 @@
-package com.hotel.booking_system.entity;
+package com.hotel.booking_system.model;
 
 import com.hotel.booking_system.enums.BookingStatus;
 import jakarta.persistence.*;
@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Data
@@ -40,7 +39,7 @@ public class Booking {
     private LocalDateTime createdDate;
     @Column(nullable = false)
     private LocalDateTime updatedDate;
-    
+
 
    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id" , nullable = false)

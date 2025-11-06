@@ -1,16 +1,14 @@
 package com.hotel.booking_system.service;
 
 import com.hotel.booking_system.dto.HotelDto;
-import com.hotel.booking_system.entity.Hotel;
+import com.hotel.booking_system.model.Hotel;
 import com.hotel.booking_system.mapper.HotelDtoMapper;
 import com.hotel.booking_system.repository.HotelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class HotelService {

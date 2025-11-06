@@ -18,7 +18,7 @@ import java.util.Date;
 public class BookingDto {
 
     @NotNull(message = "Room id is required")
-    private String roomId;//  INPUT: Cilin dhomë dëshiro
+    private Integer roomId;//  INPUT: Cilin dhomë dëshiro
     @NotNull(message = "Guest id is required")
     private Integer guestId;  //  INPUT: Kush je?
     @NotNull(message = "Check in is required")

@@ -1,4 +1,4 @@
-package com.hotel.booking_system.entity;
+package com.hotel.booking_system.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -19,7 +19,7 @@ import java.util.List;
 public class Hotel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int hotelId;
+    private int id;
     @Column(nullable = false, length = 50)
     private String hotelName;
     @Column(nullable = false, length = 50)
@@ -36,6 +36,8 @@ public class Hotel {
     private LocalDate createdDate;
     @Column(name = "updated_at")
     private LocalDate updatedDate;
+
+    private Integer number;
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

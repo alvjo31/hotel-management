@@ -1,7 +1,7 @@
 package com.hotel.booking_system.mapper;
 
 import com.hotel.booking_system.dto.HotelDto;
-import com.hotel.booking_system.entity.Hotel;
+import com.hotel.booking_system.model.Hotel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component;
 import java.util.function.Function;
 
 @Component
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class HotelDtoMapper implements Function<Hotel, HotelDto> {
     public HotelDto apply(Hotel hotel) {

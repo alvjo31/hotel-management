@@ -1,7 +1,9 @@
 package com.hotel.booking_system.mapper;
 
 import com.hotel.booking_system.dto.BookingDto;
-import com.hotel.booking_system.entity.Booking;
+import com.hotel.booking_system.model.Booking;
+import com.hotel.booking_system.repository.BookingRepository;
+import com.hotel.booking_system.repository.RoomRepository;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -10,13 +12,15 @@ import org.springframework.stereotype.Component;
 import java.util.function.Function;
 
 @Component
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class BookingDtoMapper implements Function<Booking , BookingDto> {
+public class BookingDtoMapper implements Function<Booking, BookingDto> {
+
 
     @Override
     public BookingDto apply(Booking booking) {
+        if (booking.getRoom() == null) {
+            throw new IllegalArgumentException("Room cannot be null.");
+        }
         return new BookingDto(
                 booking.getRoom().getId(),// roomid
                 booking.getGuest().getId(),
@@ -26,11 +30,12 @@ public class BookingDtoMapper implements Function<Booking , BookingDto> {
                 booking.getPrice(),
                 booking.getBookingStatus(),
                 booking.getRoom().getHotel().getHotelName(),
-                (int)booking.calculateNumberOfNights(),
+                (int) booking.calculateNumberOfNights(),
                 booking.getGuest().getFirstName(),
                 booking.getGuest().getLastName()
         );
     }
+
 
     public Booking fromDto(BookingDto bookingDto) {
         Booking booking = new Booking();
@@ -38,6 +43,6 @@ public class BookingDtoMapper implements Function<Booking , BookingDto> {
         booking.setCheckOutDate(bookingDto.getCheckOutDate());
         booking.setPrice(bookingDto.getPrice());
         booking.setBookingStatus(bookingDto.getStatus());
-    return booking;
+        return booking;
     }
 }
