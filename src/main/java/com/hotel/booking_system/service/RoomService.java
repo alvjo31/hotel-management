@@ -28,7 +28,7 @@ public class RoomService {
         checkRoom(roomDto);
         Room room = new Room();
         Room saved = roomRepository.save(room);
-        return roomDtoMapper.apply(room);
+        return roomDtoMapper.apply(saved);
 
     }
 

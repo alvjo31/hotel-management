@@ -19,7 +19,7 @@ import java.util.List;
 public class Hotel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
     @Column(nullable = false, length = 50)
     private String hotelName;
     @Column(nullable = false, length = 50)
@@ -32,7 +32,7 @@ public class Hotel {
     private Integer hotelPhone;
     @Column(nullable = false, length = 50, unique = true)
     private String hotelEmail;
-    @Column(name = "created_at ", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDate createdDate;
     @Column(name = "updated_at")
     private LocalDate updatedDate;

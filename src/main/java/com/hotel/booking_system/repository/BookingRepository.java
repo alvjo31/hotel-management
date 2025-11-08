@@ -11,8 +11,9 @@ import java.util.List;
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
     List<Booking> findByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan(
             Integer roomId,
-            LocalDate checkOutDate,
-            LocalDate checkInDate
+
+            LocalDate checkInDate,
+            LocalDate checkOutDate
     );
 
 }

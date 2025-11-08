@@ -3,6 +3,7 @@ package com.hotel.booking_system.mapper;
 import com.hotel.booking_system.dto.BookingDto;
 import com.hotel.booking_system.model.Booking;
 import com.hotel.booking_system.repository.BookingRepository;
+import com.hotel.booking_system.repository.GuestRepository;
 import com.hotel.booking_system.repository.RoomRepository;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,6 +16,13 @@ import java.util.function.Function;
 @Builder
 public class BookingDtoMapper implements Function<Booking, BookingDto> {
 
+    private final RoomRepository roomRepository;
+    private final GuestRepository guestRepository;
+
+    public BookingDtoMapper(RoomRepository roomRepository, GuestRepository guestRepository) {
+        this.roomRepository = roomRepository;
+        this.guestRepository = guestRepository;
+    }
 
     @Override
     public BookingDto apply(Booking booking) {

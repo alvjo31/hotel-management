@@ -10,8 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class GuestDto {
+    private Integer id;
     private String firstName;
     private String lastName;
     private String email;
-    private Integer phone;
+    private String phone;
 }

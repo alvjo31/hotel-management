@@ -37,10 +37,6 @@ public class BookingService {
         // Krijimi i objektit Booking nga BookingDto dhe validimi i statusit
         Booking booking = bookingDtoMapper.fromDto(bookingDto); // Krijo një Booking nga BookingDto
         validateBookingStatus(booking); // Kontrollo statusin e rezervimit
-
-        // Llogarit çmimin e rezervimit
-        Optional<Booking> optionalBooking = bookingRepository.findById(bookingDto.getRoomId());
-
         Room room = roomRepository.findById(bookingDto.getRoomId())
                 .orElseThrow(() -> new IllegalArgumentException("Room not found with ID: " + bookingDto.getRoomId()));
 
@@ -112,10 +108,16 @@ public class BookingService {
         return optionalBooking.map(bookingDtoMapper).orElse(null);
     }
 
-    public BookingDto updateBookingDto(BookingDto bookingDto) {
-        Booking booking = bookingDtoMapper.fromDto(bookingDto);
-        Booking saved = bookingRepository.save(booking);
-        return bookingDtoMapper.apply(saved);
+    public BookingDto updateBookingDto(Integer id ,BookingDto bookingDto) {
+      Booking booking = bookingRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Booking with ID " + id + " not found."));
+      booking.setRoom(roomRepository.findById(bookingDto.getRoomId()).orElseThrow(() -> new IllegalArgumentException("Room with ID " + id + " not found.")));
+      booking.setNumberOfGuests(bookingDto.getNumberOfGuests());
+      booking.setCheckInDate(bookingDto.getCheckInDate());
+      booking.setCheckOutDate(bookingDto.getCheckOutDate());
+      booking.setPrice(bookingDto.getPrice());
+      booking.setBookingStatus(BookingStatus.PENDING);
+      booking.setUpdatedDate(java.time.LocalDateTime.now());
+      return bookingDtoMapper.apply(booking);
     }
 
     public void deleteBookingDtoById(int id) {

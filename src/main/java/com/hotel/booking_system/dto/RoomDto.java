@@ -1,5 +1,6 @@
 package com.hotel.booking_system.dto;
 
+import com.hotel.booking_system.enums.BookingStatus;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +17,7 @@ public class RoomDto {
     private Integer capacity;
     private Double price;
     @Column(nullable = false)
-    private Enum status;
+    private BookingStatus status;
     @Column(nullable = false)
     private int maxGuests;
     private double pricePerNight;

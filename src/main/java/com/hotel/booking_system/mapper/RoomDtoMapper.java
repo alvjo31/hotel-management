@@ -9,7 +9,7 @@ import java.util.function.Function;
 @Component
 public class RoomDtoMapper implements Function<Room, RoomDto> {
     public RoomDto apply(Room room) {
-        return new RoomDto(room.getNumber(), room.getCapacity(), room.getPrice(), room.getStatus(), room.getMaxGuests(), room.getPricePerNight());
+        return new RoomDto(room.getNumber(), room.getCapacity(), room.getPrice(), room.getBookingStatus() , room.getMaxGuests(), room.getPricePerNight());
     }
 
 

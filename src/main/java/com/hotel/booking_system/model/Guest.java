@@ -16,13 +16,14 @@ import java.util.List;
 @Builder
 public class Guest {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String firstName;
     private String lastName;
 
     @Column(unique = true ,nullable = false , length = 100)
     private String email;
-    private Integer phone;
+    private String phone;
 
     @OneToMany(mappedBy = "guest" , cascade = CascadeType.ALL , orphanRemoval = true)
     @Builder.Default
