@@ -4,9 +4,11 @@ import com.hotel.booking_system.dto.HotelDto;
 import com.hotel.booking_system.model.Hotel;
 import com.hotel.booking_system.mapper.HotelDtoMapper;
 import com.hotel.booking_system.repository.HotelRepository;
+import com.hotel.booking_system.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,11 +16,13 @@ import java.util.Optional;
 public class HotelService {
     private final HotelRepository hotelRepository;
     private final HotelDtoMapper hotelDtoMapper;
+    private final RoomRepository roomRepository;
 
     @Autowired
-    public HotelService(HotelRepository hotelRepository, HotelDtoMapper hotelDtoMapper) {
+    public HotelService(HotelRepository hotelRepository, HotelDtoMapper hotelDtoMapper ,RoomRepository roomRepository) {
         this.hotelRepository = hotelRepository;
         this.hotelDtoMapper = hotelDtoMapper;
+        this.roomRepository = roomRepository;
     }
 
 
@@ -48,6 +52,11 @@ public class HotelService {
         hotelNameIsUnique(hotelDto.getHotelName());
 
         Hotel hotel = hotelDtoMapper.fromDto(hotelDto);
+
+        // Vendos automatikisht datat
+        hotel.setCreatedDate(LocalDate.now());
+        hotel.setUpdatedDate(LocalDate.now());
+
         Hotel savedHotel = hotelRepository.save(hotel);
         return hotelDtoMapper.apply(hotel);
     }
@@ -73,12 +82,18 @@ public class HotelService {
     }
 
 
-    public HotelDto updateHotel(HotelDto hotelDto) {
+    public HotelDto updateHotel(Integer id, HotelDto hotelDto) {
         validationHotelNameDto(hotelDto);
-
-        Hotel updatedHotel = hotelDtoMapper.fromDto(hotelDto);
-        Hotel updateHotel = hotelRepository.save(updatedHotel);
-        return hotelDtoMapper.apply(updateHotel);
+        Hotel existingHotel = hotelRepository.findById(id).orElseThrow(() -> new RuntimeException("Hotel me ID " + id + " nuk ekziston"));
+        existingHotel.setHotelCity(hotelDto.getHotelCity());
+        existingHotel.setHotelName(hotelDto.getHotelName());
+        existingHotel.setHotelAddress(hotelDto.getHotelAddress());
+        existingHotel.setHotelDescription(hotelDto.getHotelDescription());
+        existingHotel.setHotelEmail(hotelDto.getHotelEmail());
+        existingHotel.setHotelPhone(hotelDto.getHotelPhone());
+        existingHotel.setCreatedDate(hotelDto.getCreatedDate());
+        existingHotel.setUpdatedDate(hotelDto.getUpdatedDate());
+        return hotelDtoMapper.apply(existingHotel);
     }
 
     public void deleteHotel(int id) {

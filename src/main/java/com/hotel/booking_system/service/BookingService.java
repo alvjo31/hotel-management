@@ -45,7 +45,9 @@ public class BookingService {
 
         // Vendos çmimin dhe statusin e rezervimit
         booking.setPrice(price);
-        booking.setBookingStatus(BookingStatus.PENDING); // Vendosim statusin si PENDING
+        booking.setBookingStatus(bookingDto.getBookingStatus() != null
+                        ? bookingDto.getBookingStatus()
+                        : BookingStatus.CONFIRMED);
         booking.setCreatedDate(java.time.LocalDateTime.now());
         booking.setUpdatedDate(java.time.LocalDateTime.now());
 
@@ -108,16 +110,22 @@ public class BookingService {
         return optionalBooking.map(bookingDtoMapper).orElse(null);
     }
 
-    public BookingDto updateBookingDto(Integer id ,BookingDto bookingDto) {
-      Booking booking = bookingRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Booking with ID " + id + " not found."));
-      booking.setRoom(roomRepository.findById(bookingDto.getRoomId()).orElseThrow(() -> new IllegalArgumentException("Room with ID " + id + " not found.")));
-      booking.setNumberOfGuests(bookingDto.getNumberOfGuests());
-      booking.setCheckInDate(bookingDto.getCheckInDate());
-      booking.setCheckOutDate(bookingDto.getCheckOutDate());
-      booking.setPrice(bookingDto.getPrice());
-      booking.setBookingStatus(BookingStatus.PENDING);
-      booking.setUpdatedDate(java.time.LocalDateTime.now());
-      return bookingDtoMapper.apply(booking);
+    public BookingDto updateBookingDto(Integer id, BookingDto bookingDto) {
+        Booking booking = bookingRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Booking with ID " + id + " not found."));
+        booking.setRoom(roomRepository.findById(bookingDto.getRoomId()).orElseThrow(() -> new IllegalArgumentException("Room with ID " + id + " not found.")));
+        booking.setNumberOfGuests(bookingDto.getNumberOfGuests());
+        booking.setCheckInDate(bookingDto.getCheckInDate());
+        booking.setCheckOutDate(bookingDto.getCheckOutDate());
+        booking.setPrice(bookingDto.getPrice());
+        booking.setBookingStatus(
+                bookingDto.getBookingStatus() != null
+                        ? bookingDto.getBookingStatus()
+                        : BookingStatus.CONFIRMED
+        );
+
+        booking.setUpdatedDate(java.time.LocalDateTime.now());
+        Booking updatedBooking = bookingRepository.save(booking);
+        return bookingDtoMapper.apply(booking);
     }
 
     public void deleteBookingDtoById(int id) {

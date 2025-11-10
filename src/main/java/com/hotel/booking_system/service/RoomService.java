@@ -1,8 +1,11 @@
 package com.hotel.booking_system.service;
 
 import com.hotel.booking_system.dto.RoomDto;
+import com.hotel.booking_system.enums.BookingStatus;
 import com.hotel.booking_system.model.Room;
 import com.hotel.booking_system.mapper.RoomDtoMapper;
+import com.hotel.booking_system.repository.BookingRepository;
+import com.hotel.booking_system.repository.HotelRepository;
 import com.hotel.booking_system.repository.RoomRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,12 +13,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Slf4j
+
 @Service
 public class RoomService {
 
     private RoomRepository roomRepository;
     private RoomDtoMapper roomDtoMapper;
+
 
     @Autowired
     public RoomService(RoomRepository roomRepository, RoomDtoMapper roomDtoMapper) {
@@ -26,7 +30,7 @@ public class RoomService {
 
     public RoomDto addRoom(RoomDto roomDto) {
         checkRoom(roomDto);
-        Room room = new Room();
+        Room room = roomDtoMapper.fromDto(roomDto);
         Room saved = roomRepository.save(room);
         return roomDtoMapper.apply(saved);
 
@@ -35,7 +39,7 @@ public class RoomService {
     // validim nese ekziston nr i dhomes
     public void checkRoom(RoomDto roomDto) {
         if (roomDto.getNumber() == null || roomDto.getNumber() <= 0) {
-            throw new RuntimeException("Dhoma me numer " + roomDto.getNumber());
+            throw new RuntimeException("Dhoma me numer " + roomDto.getNumber() + " nuk ekziston");
         }
     }
 
@@ -51,12 +55,19 @@ public class RoomService {
                 .toList();
     }
 
-    public RoomDto updateRoom(RoomDto roomDto) {
+    public RoomDto updateRoom(Integer id, RoomDto roomDto) {
         checkRoom(roomDto);
 
-        Room updated = roomDtoMapper.fromDto(roomDto);
-        Room saved = roomRepository.save(updated);
-        return roomDtoMapper.apply(saved);
+        Room updated = roomRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Room with ID " + id + " not found."));
+        updated.setNumber(roomDto.getNumber());
+        updated.setCapacity(roomDto.getCapacity());
+        updated.setBookingStatus(BookingStatus.CONFIRMED);
+        updated.setPrice(roomDto.getPrice());
+        updated.setMaxGuests(roomDto.getMaxGuests());
+        updated.setPricePerNight(roomDto.getPricePerNight());
+        updated.setHotel(updated.getHotel());
+        Room updatedRoom = roomRepository.save(updated);
+        return roomDtoMapper.apply(updated);
 
     }
 
@@ -65,6 +76,13 @@ public class RoomService {
                 .stream()
                 .map(roomDtoMapper)
                 .toList();
+    }
+
+    public void deleteRoom(Integer id) {
+        if (!roomRepository.existsById(id)) {
+            throw new RuntimeException("Room with ID " + id + " not found.");
+        }
+        roomRepository.deleteById(id);
     }
 }
 

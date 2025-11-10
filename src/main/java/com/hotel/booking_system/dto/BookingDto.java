@@ -36,7 +36,7 @@ public class BookingDto {
 
     // RESPONSE only (nuk i dërgon user-i):
     private double price;   // OUTPUT: "100 euro "
-    private BookingStatus status;    //  OUTPUT: PENDING
+    private BookingStatus bookingStatus;    //  OUTPUT: PENDING
     private String hotelName; // OUTPUT: "Grand Hotel"
     private Integer numberOfNights;  // OUTPUT: 5 nights
     private String guestFirstName;  // OUTPUT: "John "

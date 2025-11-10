@@ -82,7 +82,7 @@ public class GuestService {
 
     }
 
-    public GuestDto updateGuests(GuestDto guestDto) throws BadRequestException {
+    public GuestDto updateGuests(Integer id ,GuestDto guestDto) throws BadRequestException {
         validateGuestDtoForUpdate(guestDto);
         Guest existinGguest = guestRepository
                 .findById(guestDto.getId())
@@ -158,6 +158,11 @@ public class GuestService {
 
                 );
 
+    }
 
+    public  void deleteRoom(Integer id) {
+        if (!guestRepository.existsById(id)) {
+            throw new RuntimeException("Room with ID " + id + " not found.");
+        }
     }
 }
