@@ -5,6 +5,7 @@ import com.hotel.booking_system.model.Hotel;
 import com.hotel.booking_system.mapper.HotelDtoMapper;
 import com.hotel.booking_system.repository.HotelRepository;
 import com.hotel.booking_system.repository.RoomRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,7 +47,7 @@ public class HotelService {
                 ));
     }
 
-
+@Transactional
     public HotelDto addHotel(HotelDto hotelDto) {
         validationHotelNameDto(hotelDto);
         hotelNameIsUnique(hotelDto.getHotelName());
@@ -63,7 +64,7 @@ public class HotelService {
 
 
     // si fillim validon qe emri mos te jete bosh
-    public void validationHotelNameDto(HotelDto hotelDto) {
+    private void validationHotelNameDto(HotelDto hotelDto) {
         if (hotelDto.getHotelName() == null || hotelDto.getHotelName().trim().isEmpty()) {
             throw new RuntimeException("Emri i hotelit eshte i detyrueshem");
         }
@@ -74,14 +75,14 @@ public class HotelService {
     }
 
     // kontrollon qe emri mos te jete i perseritur
-    public void hotelNameIsUnique(String hotelName) {
+    private void hotelNameIsUnique(String hotelName) {
         hotelRepository.getByHotelName(hotelName)
                 .ifPresent(hotel -> {
                     throw new RuntimeException("Hotel me emrin '" + hotelName + "' tashmë ekziston");
                 });
     }
 
-
+@Transactional
     public HotelDto updateHotel(Integer id, HotelDto hotelDto) {
         validationHotelNameDto(hotelDto);
         Hotel existingHotel = hotelRepository.findById(id).orElseThrow(() -> new RuntimeException("Hotel me ID " + id + " nuk ekziston"));
@@ -96,6 +97,7 @@ public class HotelService {
         return hotelDtoMapper.apply(existingHotel);
     }
 
+    @Transactional
     public void deleteHotel(int id) {
         if (!hotelRepository.existsById(id)) {
             throw new RuntimeException("Hotel me ID " + id + " nuk ekziston.");

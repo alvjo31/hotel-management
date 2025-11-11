@@ -82,6 +82,7 @@ public class GuestService {
 
     }
 
+    @Transactional
     public GuestDto updateGuests(Integer id ,GuestDto guestDto) throws BadRequestException {
         validateGuestDtoForUpdate(guestDto);
         Guest existinGguest = guestRepository
@@ -97,7 +98,7 @@ public class GuestService {
     }
 
     // Basic validation
-    public void validateGuesDto(GuestDto guestDto) throws BadRequestException {
+    private void validateGuesDto(GuestDto guestDto) throws BadRequestException {
         if (guestDto.getFirstName() == null || guestDto.getFirstName().isEmpty()) {
             throw new BadRequestException("First name is required");
         }
@@ -122,7 +123,7 @@ public class GuestService {
 
     // Validation for update
 
-    public void validateGuestDtoForUpdate(GuestDto guestDto) throws BadRequestException {
+    private void validateGuestDtoForUpdate(GuestDto guestDto) throws BadRequestException {
         if (guestDto.getLastName() != null) {
             if (guestDto.getLastName().trim().isEmpty()) {
                 throw new BadRequestException("Last name cannot be empty");
@@ -160,6 +161,7 @@ public class GuestService {
 
     }
 
+    @Transactional
     public  void deleteRoom(Integer id) {
         if (!guestRepository.existsById(id)) {
             throw new RuntimeException("Room with ID " + id + " not found.");

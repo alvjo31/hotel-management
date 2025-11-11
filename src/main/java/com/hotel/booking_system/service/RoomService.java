@@ -7,6 +7,7 @@ import com.hotel.booking_system.mapper.RoomDtoMapper;
 import com.hotel.booking_system.repository.BookingRepository;
 import com.hotel.booking_system.repository.HotelRepository;
 import com.hotel.booking_system.repository.RoomRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class RoomService {
         this.roomDtoMapper = roomDtoMapper;
     }
 
-
+@Transactional
     public RoomDto addRoom(RoomDto roomDto) {
         checkRoom(roomDto);
         Room room = roomDtoMapper.fromDto(roomDto);
@@ -55,6 +56,7 @@ public class RoomService {
                 .toList();
     }
 
+    @Transactional
     public RoomDto updateRoom(Integer id, RoomDto roomDto) {
         checkRoom(roomDto);
 
@@ -78,6 +80,7 @@ public class RoomService {
                 .toList();
     }
 
+    @Transactional
     public void deleteRoom(Integer id) {
         if (!roomRepository.existsById(id)) {
             throw new RuntimeException("Room with ID " + id + " not found.");

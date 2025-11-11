@@ -7,6 +7,7 @@ import com.hotel.booking_system.enums.BookingStatus;
 import com.hotel.booking_system.mapper.BookingDtoMapper;
 import com.hotel.booking_system.repository.BookingRepository;
 import com.hotel.booking_system.repository.RoomRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ public class BookingService {
     private BookingDtoMapper bookingDtoMapper;
     private RoomRepository roomRepository;
 
+
     @Autowired
     public BookingService(BookingRepository bookingRepository, BookingDtoMapper bookingDtoMapper, RoomRepository roomRepository) {
         this.bookingRepository = bookingRepository;
@@ -28,6 +30,7 @@ public class BookingService {
         this.roomRepository = roomRepository;
     }
 
+    @Transactional
     public BookingDto addBooking(BookingDto bookingDto) {
         validateDates(bookingDto.getCheckInDate(), bookingDto.getCheckOutDate());
         isRoomAvailable(bookingDto.getRoomId(), bookingDto.getCheckInDate(), bookingDto.getCheckOutDate());
@@ -68,7 +71,7 @@ public class BookingService {
         return overlappingBookings.isEmpty();
     }
 
-    public void validateDates(LocalDate checkInDate, LocalDate checkOutDate) {
+    private void validateDates(LocalDate checkInDate, LocalDate checkOutDate) {
         if (checkInDate.isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("Check-in date duhet te jete ne te ardhmen.");
         }
@@ -77,13 +80,13 @@ public class BookingService {
         }
     }
 
-    public void checkNumberOfGuets(int numberOfGuests) {
+    private void checkNumberOfGuets(int numberOfGuests) {
         if (numberOfGuests <= 0 || numberOfGuests > 10) {
             throw new IllegalArgumentException("Numri i guests duhet te jete midis 1 dhe 10.");
         }
     }
 
-    public void validateRoomCapacity(Integer roomId, int numberOfGuests) {
+    private void validateRoomCapacity(Integer roomId, int numberOfGuests) {
         Optional<Room> room = roomRepository.findById(roomId);
         if (!room.isPresent()) {
             throw new IllegalArgumentException("Room with ID " + roomId + " not found.");
@@ -93,13 +96,13 @@ public class BookingService {
         }
     }
 
-    public void validateBookingStatus(Booking booking) {
+    private void validateBookingStatus(Booking booking) {
         if (booking.getBookingStatus() == BookingStatus.CANCELLED) {
             throw new IllegalStateException("Cannot modify a cancelled booking.");
         }
     }
 
-    public double calculatePrice(Room room, int numberOfGuests, long numberOfNights) {
+    private double calculatePrice(Room room, int numberOfGuests, long numberOfNights) {
         double basePrice = room.getPricePerNight();
         double totalPrice = basePrice * numberOfNights * numberOfGuests;
         return totalPrice;
@@ -110,6 +113,7 @@ public class BookingService {
         return optionalBooking.map(bookingDtoMapper).orElse(null);
     }
 
+    @Transactional
     public BookingDto updateBookingDto(Integer id, BookingDto bookingDto) {
         Booking booking = bookingRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Booking with ID " + id + " not found."));
         booking.setRoom(roomRepository.findById(bookingDto.getRoomId()).orElseThrow(() -> new IllegalArgumentException("Room with ID " + id + " not found.")));
@@ -128,6 +132,7 @@ public class BookingService {
         return bookingDtoMapper.apply(booking);
     }
 
+    @Transactional
     public void deleteBookingDtoById(int id) {
         if (!bookingRepository.existsById(id)) {
             throw new RuntimeException("Booking me ID " + id + " nuk ekziston.");

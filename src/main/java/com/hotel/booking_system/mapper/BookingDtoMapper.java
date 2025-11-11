@@ -50,7 +50,7 @@ public class BookingDtoMapper implements Function<Booking, BookingDto> {
         booking.setCheckInDate(bookingDto.getCheckInDate());
         booking.setCheckOutDate(bookingDto.getCheckOutDate());
         booking.setPrice(bookingDto.getPrice());
-        booking.setBookingStatus(bookingDto.getStatus());
+        booking.setBookingStatus(bookingDto.getBookingStatus());
         return booking;
     }
 }
