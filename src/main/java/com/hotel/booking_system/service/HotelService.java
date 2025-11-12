@@ -105,7 +105,7 @@ public class HotelService {
         hotelRepository.deleteById(id);
     }
 
-    public List<HotelDto> getAllHotels(String hotelName) {
+    public List<HotelDto> getAllHotels(Object o) {
         return hotelRepository.findAll()
                 .stream()
                 .map(hotelDtoMapper)

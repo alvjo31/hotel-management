@@ -115,6 +115,7 @@ public class ReviewService {
     }
 
 
+    @Transactional
     public ReviewDto updateReview(Integer reviewId, ReviewDto reviewDto, Integer hotelId, Integer guestId) {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new IllegalArgumentException("Review not found"));
         validateReview(reviewDto);
@@ -142,6 +143,7 @@ public class ReviewService {
 
     }
 
+    @Transactional
     public void deleteReview(Integer reviewId) {
         if (reviewRepository.existsById(reviewId)) {
             throw new IllegalArgumentException("Review not found");
