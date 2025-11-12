@@ -28,8 +28,9 @@ public class HotelService {
 
 
     public HotelDto getHotelById(int id) {
-        Optional<Hotel> hotel = hotelRepository.findById(id);
-        return hotelDtoMapper.apply(hotel.get());
+        Hotel hotel = hotelRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Hotel not found"));
+        return hotelDtoMapper.apply(hotel);
     }
 
     public HotelDto getHotelByName(String hotelName) {
@@ -105,7 +106,7 @@ public class HotelService {
         hotelRepository.deleteById(id);
     }
 
-    public List<HotelDto> getAllHotels(Object o) {
+    public List<HotelDto> getAllHotels() {
         return hotelRepository.findAll()
                 .stream()
                 .map(hotelDtoMapper)
