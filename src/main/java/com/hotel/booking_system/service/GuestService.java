@@ -73,7 +73,7 @@ public class GuestService {
                 ));
     }
 
-    public List<GuestDto> findAllGuestDto() {
+    public List<GuestDto> findAllGuests() {
 
         return guestRepository.findAll()
                 .stream()

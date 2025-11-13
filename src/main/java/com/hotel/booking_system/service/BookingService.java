@@ -145,4 +145,12 @@ public class BookingService {
         return bookingDtoMapper.apply(optionalBooking.get());
     }
 
+    public List<BookingDto> findAllBooking() {
+        return Optional.of(bookingRepository.findAll())
+                .filter(list -> !list.isEmpty())
+                .map(list -> list.stream()
+                        .map(bookingDtoMapper)
+                        .toList())
+                .orElseThrow(() -> new RuntimeException("Nuk ka rezervime ne sistem."));
+    }
 }

@@ -129,7 +129,7 @@ public class ReviewService {
         return reviewDtoMapper.apply(saved);
     }
 
-    public ReviewDto getReview(Integer reviewId) {
+    public ReviewDto getReviewbyId(Integer reviewId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("Review not found"));
         return reviewDtoMapper.apply(review);
