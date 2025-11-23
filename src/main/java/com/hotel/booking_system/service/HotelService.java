@@ -1,6 +1,9 @@
 package com.hotel.booking_system.service;
 
 import com.hotel.booking_system.dto.HotelDto;
+import com.hotel.booking_system.exceptions.BadRequestException;
+import com.hotel.booking_system.exceptions.DuplicateResourceException;
+import com.hotel.booking_system.exceptions.ResourceNotFindException;
 import com.hotel.booking_system.model.Hotel;
 import com.hotel.booking_system.mapper.HotelDtoMapper;
 import com.hotel.booking_system.repository.HotelRepository;
@@ -29,7 +32,7 @@ public class HotelService {
 
     public HotelDto getHotelById(int id) {
         Hotel hotel = hotelRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Hotel not found"));
+                .orElseThrow(() -> new ResourceNotFindException("Hotel not found"));
         return hotelDtoMapper.apply(hotel);
     }
 
@@ -43,7 +46,7 @@ public class HotelService {
 
         return hotelRepository.getByHotelName(hotelName)
                 .map(hotelDtoMapper)
-                .orElseThrow(() -> new RuntimeException(
+                .orElseThrow(() -> new ResourceNotFindException(
                         "Hotel me emrin '" + hotelName + "' nuk u gjet."
                 ));
     }
@@ -67,11 +70,11 @@ public class HotelService {
     // si fillim validon qe emri mos te jete bosh
     private void validationHotelNameDto(HotelDto hotelDto) {
         if (hotelDto.getHotelName() == null || hotelDto.getHotelName().trim().isEmpty()) {
-            throw new RuntimeException("Emri i hotelit eshte i detyrueshem");
+            throw new BadRequestException("Emri i hotelit eshte i detyrueshem" );
         }
         // validon qe qyteti mos te jete bosh
         if (hotelDto.getHotelCity() == null || hotelDto.getHotelCity().trim().isEmpty()) {
-            throw new RuntimeException("Qyteti i hotelit eshte i detyrueshem");
+            throw new BadRequestException("Qyteti i hotelit eshte i detyrueshem");
         }
     }
 
@@ -79,14 +82,14 @@ public class HotelService {
     private void hotelNameIsUnique(String hotelName) {
         hotelRepository.getByHotelName(hotelName)
                 .ifPresent(hotel -> {
-                    throw new RuntimeException("Hotel me emrin '" + hotelName + "' tashmë ekziston");
+                    throw new DuplicateResourceException("Hotel me emrin '" + hotelName + "' tashmë ekziston");
                 });
     }
 
 @Transactional
     public HotelDto updateHotel(Integer id, HotelDto hotelDto) {
         validationHotelNameDto(hotelDto);
-        Hotel existingHotel = hotelRepository.findById(id).orElseThrow(() -> new RuntimeException("Hotel me ID " + id + " nuk ekziston"));
+        Hotel existingHotel = hotelRepository.findById(id).orElseThrow(() -> new ResourceNotFindException("Hotel me ID " + id + " nuk ekziston"));
         existingHotel.setHotelCity(hotelDto.getHotelCity());
         existingHotel.setHotelName(hotelDto.getHotelName());
         existingHotel.setHotelAddress(hotelDto.getHotelAddress());
@@ -101,7 +104,7 @@ public class HotelService {
     @Transactional
     public void deleteHotel(int id) {
         if (!hotelRepository.existsById(id)) {
-            throw new RuntimeException("Hotel me ID " + id + " nuk ekziston.");
+            throw new ResourceNotFindException("Hotel me ID " + id + " nuk ekziston.");
         }
         hotelRepository.deleteById(id);
     }

@@ -24,7 +24,7 @@ public class Booking {
    private LocalDate checkInDate;
 
     @Column(nullable = false)
-   private LocalDate checkOutDate;
+   private LocalDate checkoutDate;
 
     @Column(nullable = false)
    private double price;
@@ -61,6 +61,6 @@ public class Booking {
    }
 
    public long calculateNumberOfNights(){
-       return java.time.temporal.ChronoUnit.DAYS.between(checkInDate, checkOutDate);
+       return java.time.temporal.ChronoUnit.DAYS.between(checkInDate, checkoutDate);
    }
 }

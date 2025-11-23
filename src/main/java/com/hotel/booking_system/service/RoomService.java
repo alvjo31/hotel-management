@@ -2,13 +2,14 @@ package com.hotel.booking_system.service;
 
 import com.hotel.booking_system.dto.RoomDto;
 import com.hotel.booking_system.enums.BookingStatus;
+import com.hotel.booking_system.exceptions.BadRequestException;
+import com.hotel.booking_system.exceptions.ResourceNotFindException;
 import com.hotel.booking_system.model.Room;
 import com.hotel.booking_system.mapper.RoomDtoMapper;
 import com.hotel.booking_system.repository.BookingRepository;
 import com.hotel.booking_system.repository.HotelRepository;
 import com.hotel.booking_system.repository.RoomRepository;
 import jakarta.transaction.Transactional;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,14 +41,14 @@ public class RoomService {
     // validim nese ekziston nr i dhomes
     public void checkRoom(RoomDto roomDto) {
         if (roomDto.getNumber() == null || roomDto.getNumber() <= 0) {
-            throw new RuntimeException("Dhoma me numer " + roomDto.getNumber() + " nuk ekziston");
+            throw new ResourceNotFindException("Dhoma me numer " + roomDto.getNumber() + " nuk ekziston");
         }
     }
 
     public List<RoomDto> getRoomsByHotelNumber(Integer hotelNumber) {
 
         if (hotelNumber == null || hotelNumber <= 0) {
-            throw new RuntimeException("Numri i hotelit është i pavlefshëm");
+            throw new BadRequestException("Numri i hotelit është i pavlefshëm");
         }
         return roomRepository.findByHotelNumber(hotelNumber)
                 .stream()
@@ -60,7 +61,7 @@ public class RoomService {
     public RoomDto updateRoom(Integer id, RoomDto roomDto) {
         checkRoom(roomDto);
 
-        Room updated = roomRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Room with ID " + id + " not found."));
+        Room updated = roomRepository.findById(id).orElseThrow(() -> new ResourceNotFindException("Room with ID " + id + " not found."));
         updated.setNumber(roomDto.getNumber());
         updated.setCapacity(roomDto.getCapacity());
         updated.setBookingStatus(BookingStatus.CONFIRMED);
@@ -83,7 +84,7 @@ public class RoomService {
     @Transactional
     public void deleteRoom(Integer id) {
         if (!roomRepository.existsById(id)) {
-            throw new RuntimeException("Room with ID " + id + " not found.");
+            throw new ResourceNotFindException("Room with ID " + id + " not found.");
         }
         roomRepository.deleteById(id);
     }

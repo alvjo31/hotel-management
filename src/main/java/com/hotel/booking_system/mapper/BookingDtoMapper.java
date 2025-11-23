@@ -33,7 +33,7 @@ public class BookingDtoMapper implements Function<Booking, BookingDto> {
                 booking.getRoom().getId(),// roomid
                 booking.getGuest().getId(),
                 booking.getCheckInDate(),
-                booking.getCheckOutDate(),
+                booking.getCheckoutDate(),
                 booking.getNumberOfGuests(),
                 booking.getPrice(),
                 booking.getBookingStatus(),
@@ -48,7 +48,7 @@ public class BookingDtoMapper implements Function<Booking, BookingDto> {
     public Booking fromDto(BookingDto bookingDto) {
         Booking booking = new Booking();
         booking.setCheckInDate(bookingDto.getCheckInDate());
-        booking.setCheckOutDate(bookingDto.getCheckOutDate());
+        booking.setCheckoutDate(bookingDto.getCheckOutDate());
         booking.setPrice(bookingDto.getPrice());
         booking.setBookingStatus(bookingDto.getBookingStatus());
         return booking;

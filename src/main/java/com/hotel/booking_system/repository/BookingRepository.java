@@ -11,13 +11,22 @@ import java.util.Optional;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
-    List<Booking> findByRoomIdAndCheckInDateLessThanAndCheckOutDateGreaterThan(
-            Integer roomId,
 
+    List<Booking> findByRoom_IdAndCheckInDateLessThanAndCheckoutDateGreaterThan(
+            Integer roomId,
             LocalDate checkInDate,
             LocalDate checkOutDate
     );
-    boolean existsByGuestIdAndHotelIdAndCheckoutDateBefore(Integer guestId, Integer hotelId, Date checkoutDate);
-    Optional<Booking> findTopByGuestIdAndHotelIdOrderByCheckoutDateDesc(Integer guestId, Integer hotelId);
 
+    boolean existsByGuest_IdAndRoom_Hotel_IdAndCheckoutDateBefore(
+            Integer guestId,
+            Integer hotelId,
+            LocalDate checkOutDate
+    );
+
+    Optional<Booking> findTopByGuest_IdAndRoom_Hotel_IdOrderByCheckoutDateDesc(
+            Integer guestId,
+            Integer hotelId
+    );
 }
+

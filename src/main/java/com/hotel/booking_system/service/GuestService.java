@@ -1,15 +1,17 @@
 package com.hotel.booking_system.service;
 
 import com.hotel.booking_system.dto.GuestDto;
+import com.hotel.booking_system.exceptions.DuplicateResourceException;
+import com.hotel.booking_system.exceptions.ResourceNotFindException;
 import com.hotel.booking_system.mapper.GuestDtoMapper;
 import com.hotel.booking_system.model.Guest;
 import com.hotel.booking_system.repository.BookingRepository;
 import com.hotel.booking_system.repository.GuestRepository;
 import jakarta.transaction.Transactional;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.BadRequestException;
+import com.hotel.booking_system.exceptions.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -48,13 +50,13 @@ public class GuestService {
     }
 
     @Transactional
-    public GuestDto addGuest(GuestDto guestDto) throws BadRequestException {
+    public GuestDto addGuest(GuestDto guestDto) throws DuplicateResourceException {
         validateGuesDto(guestDto);
         validateGuestDtoForUpdate(guestDto);
         validateUniqueEmail(guestDto.getEmail());
         Guest guest = guestDtoMapper.fromDto(guestDto);
         if (hasActiveBookings(guest)) {
-            throw new BadRequestException("This guest is already active.");
+            throw new DuplicateResourceException("Guest " , "status " ,"already active.");
         }
         // e konverton ne entitet
         Guest guestSaved = guestRepository.save(guest);  // save ne db
@@ -68,7 +70,7 @@ public class GuestService {
 
         return guestRepository.findById(id)
                 .map(guestDtoMapper)
-                .orElseThrow(() -> new RuntimeException(
+                .orElseThrow(() -> new ResourceNotFindException(
                         "Hotel me emrin '" + guest + "' nuk u gjet."
                 ));
     }
@@ -83,14 +85,14 @@ public class GuestService {
     }
 
     @Transactional
-    public GuestDto updateGuests(Integer id ,GuestDto guestDto) throws BadRequestException {
+    public GuestDto updateGuests(Integer id ,GuestDto guestDto) throws com.hotel.booking_system.exceptions.BadRequestException {
         validateGuestDtoForUpdate(guestDto);
         Guest existinGguest = guestRepository
                 .findById(guestDto.getId())
-                .orElseThrow(() -> new BadRequestException("Guest not found"));
+                .orElseThrow(() -> new ResourceNotFindException("Guest not found"));
         validateUniqueEmail(guestDto.getEmail());
         if (hasActiveBookings(existinGguest)) {
-            throw new BadRequestException("Cannot update guest with active bookings");
+            throw new DuplicateResourceException("Cannot update guest with active bookings");
         }
 
         Guest guestSaved = guestRepository.save(existinGguest);
@@ -106,7 +108,8 @@ public class GuestService {
             throw new BadRequestException("Last name is required");
         }
         if (guestDto.getFirstName().length() < 2 || guestDto.getFirstName().length() > 50) {
-            throw new BadRequestException("First name must be between 2 and 50 characters");
+            throw new BadRequestException(
+            "First name must be between 2 and 50 characters");
         }
 
         if (guestDto.getLastName().length() < 2 || guestDto.getLastName().length() > 50) {
@@ -144,7 +147,7 @@ public class GuestService {
 
     private void validateUniqueEmail(String email) {
         if (guestRepository.existsByEmail(email)) {
-            throw new RuntimeException(
+            throw new DuplicateResourceException(
                     "Guest with email '" + email + "' already exists");
 
         }
@@ -164,7 +167,7 @@ public class GuestService {
     @Transactional
     public  void deleteRoom(Integer id) {
         if (!guestRepository.existsById(id)) {
-            throw new RuntimeException("Room with ID " + id + " not found.");
+            throw new ResourceNotFindException("Room with ID " + id + " not found.");
         }
     }
 }

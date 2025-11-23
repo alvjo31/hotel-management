@@ -1,11 +1,13 @@
 package com.hotel.booking_system.service;
 
 import com.hotel.booking_system.dto.ReviewDto;
+import com.hotel.booking_system.exceptions.BadRequestException;
+import com.hotel.booking_system.exceptions.DuplicateResourceException;
+import com.hotel.booking_system.exceptions.ResourceNotFindException;
 import com.hotel.booking_system.mapper.ReviewDtoMapper;
 import com.hotel.booking_system.model.Booking;
 import com.hotel.booking_system.model.Review;
 import com.hotel.booking_system.repository.*;
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,8 +45,8 @@ public class ReviewService {
         validateNoplicateReview(guestId ,hotelId);
         validateReviewTiming(guestId,hotelId);
         Review review = reviewDtoMapper.fromDto(reviewDto);
-        review.setGuest(guestRepository.findById(guestId).orElseThrow(() -> new IllegalArgumentException("Guest not found")));
-        review.setHotel(hotelRepository.findById(hotelId).orElseThrow(() -> new IllegalArgumentException("Hotel not found")));
+        review.setGuest(guestRepository.findById(guestId).orElseThrow(() -> new ResourceNotFindException("Guest not found")));
+        review.setHotel(hotelRepository.findById(hotelId).orElseThrow(() -> new ResourceNotFindException("Hotel not found")));
         Review saved = reviewRepository.save(review);
         return reviewDtoMapper.apply(saved);
     }
@@ -52,44 +54,44 @@ public class ReviewService {
 
     private void validateReview(ReviewDto reviewDto) {
         if (reviewDto.getRating() == null) {
-            throw new IllegalArgumentException("Vleresimi nuk mund te jete bosh");
+            throw new BadRequestException("Vleresimi nuk mund te jete bosh");
         }
         if (reviewDto.getRating() < 0 || reviewDto.getRating() > 5) {
-            throw new IllegalArgumentException("Vleresimi duhet te jete midis 1-5");
+            throw new BadRequestException("Vleresimi duhet te jete midis 1-5");
         }
         if (reviewDto.getComment() == null || reviewDto.getComment().isBlank()) {
-            throw new IllegalArgumentException("Komenti nuk mund te jete bosh");
+            throw new BadRequestException("Komenti nuk mund te jete bosh");
         }
         if (reviewDto.getComment().length() > 1000) {
-            throw new IllegalArgumentException("Komenti nuk duhet te jete me shume se 1000 karaktere");
+            throw new BadRequestException("Komenti nuk duhet te jete me shume se 1000 karaktere");
         }
         if (reviewDto.getDate() == null && reviewDto.getDate().after(new Date())) {
-            throw new IllegalArgumentException("Data nuk mund te jete en te ardhmen");
+            throw new BadRequestException("Data nuk mund te jete en te ardhmen");
         }
     }
 
     private void validateHotelAndGuest(Integer hotelId, Integer guestId) {
         if (hotelId == null) {
-            throw new IllegalArgumentException("Hotel ID nuk mund te jete bosh");
+            throw new BadRequestException("Hotel ID nuk mund te jete bosh");
         }
 
         if (guestId == null) {
-            throw new IllegalArgumentException("Guest ID nuk mund te jete bosh");
+            throw new BadRequestException("Guest ID nuk mund te jete bosh");
         }
 
         if (!hotelRepository.existsById(hotelId)) {
-            throw new IllegalArgumentException("Hotel me id " + hotelId + " nuk ekziston");
+            throw new ResourceNotFindException("Hotel me id " + hotelId + " nuk ekziston");
         }
 
         if (!guestRepository.existsById(guestId)) {
-            throw new IllegalArgumentException("Guest me id " + guestId + " nuk ekziston");
+            throw new ResourceNotFindException("Guest me id " + guestId + " nuk ekziston");
         }
     }
 
     public void guestStayedInHotel(Integer guestId, Integer hotelId) {
-        boolean stayedInHotel = bookingRepository.existsByGuestIdAndHotelIdAndCheckoutDateBefore(guestId , hotelId ,new Date());
+        boolean stayedInHotel = bookingRepository.existsByGuest_IdAndRoom_Hotel_IdAndCheckoutDateBefore(guestId , hotelId ,LocalDate.now());
             if (!stayedInHotel) {
-                throw new IllegalArgumentException("Guest nuk mund te le review pa qendruar ne hotel");
+                throw new BadRequestException("Guest nuk mund te le review pa qendruar ne hotel");
             }
 
     }
@@ -97,27 +99,27 @@ public class ReviewService {
 
     private void validateNoplicateReview(Integer guestId, Integer hotelId) {
         boolean alreadyReviewd = reviewRepository.existsByGuestIdAndHotelId(guestId, hotelId);
-        if (!alreadyReviewd) {
-            throw new IllegalArgumentException("Keni lene nje review tashme");
+        if (alreadyReviewd) {
+            throw new DuplicateResourceException("Keni lene nje review tashme");
         }
     }
 
     // ✅ Review Timing (brenda 365 ditëve nga checkout)
     private void validateReviewTiming(Integer guestId, Integer hotelId) {
-        Booking booking = bookingRepository.findTopByGuestIdAndHotelIdOrderByCheckoutDateDesc(guestId, hotelId)
-                .orElseThrow(() -> new IllegalArgumentException("Guest nuk ka qëndruar në këtë hotel."));
+        Booking booking = bookingRepository.findTopByGuest_IdAndRoom_Hotel_IdOrderByCheckoutDateDesc(guestId, hotelId)
+                .orElseThrow(() -> new ResourceNotFindException("Guest nuk ka qëndruar në këtë hotel."));
 
-        long days = ChronoUnit.DAYS.between(booking.getCheckOutDate(), LocalDate.now());
+        long days = ChronoUnit.DAYS.between(booking.getCheckoutDate(), LocalDate.now());
 
         if (days > 365) {
-            throw new IllegalArgumentException("Nuk mund të lësh review më vonë se 365 ditë pas checkout-it.");
+            throw new BadRequestException("Nuk mund të lësh review më vonë se 365 ditë pas checkout-it.");
         }
     }
 
 
     @Transactional
     public ReviewDto updateReview(Integer reviewId, ReviewDto reviewDto, Integer hotelId, Integer guestId) {
-        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new IllegalArgumentException("Review not found"));
+        Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new ResourceNotFindException("Review not found"));
         validateReview(reviewDto);
         validateHotelAndGuest(hotelId, guestId);
         // perditesimin e vlerave
@@ -131,7 +133,7 @@ public class ReviewService {
 
     public ReviewDto getReviewbyId(Integer reviewId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new IllegalArgumentException("Review not found"));
+                .orElseThrow(() -> new ResourceNotFindException("Review not found"));
         return reviewDtoMapper.apply(review);
     }
 
@@ -146,7 +148,7 @@ public class ReviewService {
     @Transactional
     public void deleteReview(Integer reviewId) {
         if (reviewRepository.existsById(reviewId)) {
-            throw new IllegalArgumentException("Review not found");
+            throw new ResourceNotFindException("Review not found");
         }
         reviewRepository.deleteById(reviewId);
     }
