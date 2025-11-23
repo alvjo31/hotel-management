@@ -20,13 +20,13 @@ import java.util.Optional;
 public class HotelService {
     private final HotelRepository hotelRepository;
     private final HotelDtoMapper hotelDtoMapper;
-    private final RoomRepository roomRepository;
+
 
     @Autowired
-    public HotelService(HotelRepository hotelRepository, HotelDtoMapper hotelDtoMapper ,RoomRepository roomRepository) {
+    public HotelService(HotelRepository hotelRepository, HotelDtoMapper hotelDtoMapper) {
         this.hotelRepository = hotelRepository;
         this.hotelDtoMapper = hotelDtoMapper;
-        this.roomRepository = roomRepository;
+
     }
 
 
