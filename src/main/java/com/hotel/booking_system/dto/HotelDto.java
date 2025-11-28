@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 public class HotelDto {
+    private Integer hotelId;
     private String hotelName;
     private String hotelAddress;
     private String hotelCity;

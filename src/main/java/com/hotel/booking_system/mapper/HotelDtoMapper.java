@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 import java.util.function.Function;
 
 @Component
-@Builder
 public class HotelDtoMapper implements Function<Hotel, HotelDto> {
     public HotelDto apply(Hotel hotel) {
 
-        return new HotelDto(hotel.getHotelName(),
+        return new HotelDto(hotel.getId(),
+                hotel.getHotelName(),
                 hotel.getHotelAddress(),
                 hotel.getHotelCity(),
                 hotel.getHotelDescription(),

@@ -37,7 +37,6 @@ public class HotelService {
     }
 
     public HotelDto getHotelByName(String hotelName) {
-        Optional<Hotel> hotelByName = hotelRepository.getByHotelName(hotelName);
 
         // if (hotelByName.isPresent()) {
         //   return hotelDtoMapper.apply(hotelByName.get());
