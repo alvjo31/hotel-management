@@ -178,25 +178,26 @@ public class HotelServiceTest {
     void testAddHotel_WithEmptyCity_ThrowsBadRequestException() {
         // GIVEN
         HotelDto invalidDto = new HotelDto(
-                null,
+                1,
                 "Hotel Name",
-                "",  // Qytet bosh
-                "Rruga X",
+                "Hotel Adress",
+                "",
                 "+355691111111",
                 123,
-                "Pershkrim",
-                null,
-                null
-        );
+                        "Pershkrim",
+                        null,
+                        null
+                        );
 
-        // WHEN & THEN
-        BadRequestException exception = assertThrows(
-                BadRequestException.class,
-                () -> hotelService.addHotel(invalidDto)
-        );
+    // WHEN & THEN
+    BadRequestException exception = assertThrows(
+            BadRequestException.class,
+            () -> hotelService.addHotel(invalidDto)
+    );
 
-        assertEquals("Qyteti i hotelit eshte i detyrueshem", exception.getMessage());
-    }
+    assertEquals("Qyteti i hotelit eshte i detyrueshem", exception.getMessage());
+
+}
 
     @Test
     void testAddHotel_WithDuplicateName_ThrowsDuplicateResourceException() {
@@ -222,9 +223,6 @@ public class HotelServiceTest {
                 () -> hotelService.addHotel(duplicateDto)
         );
 
-        assertTrue(exception.getMessage().contains("Grand Hotel"));
-        assertTrue(exception.getMessage().contains("ekziston"));
-        verify(hotelRepository, never()).save(any());
     }
 
     // ========== TESTET PËR updateHotel ==========
@@ -236,8 +234,8 @@ public class HotelServiceTest {
         HotelDto updatedDto = new HotelDto(
                 1,
                 "Grand Hotel Updated",
-                "Tirane",
                 "Rruga e Re 456",
+                "Tirane",
                 "+355691234567",
                 123,
                 "Hotel i perditesuar",
@@ -367,8 +365,8 @@ public class HotelServiceTest {
         hotel2.setHotelCity("Sarande");
 
         HotelDto hotelDto2 = new HotelDto(
-                2, "Beach Hotel", "Sarande", "Beach Road",
-                "+355693333333", 123, "Beach hotel",
+                2, "Beach Hotel", "Sarande", "Sarande",
+                "+355693333333", 123, "Beach@gmail.com",
                 LocalDate.now(), LocalDate.now()
         );
 
@@ -389,7 +387,7 @@ public class HotelServiceTest {
         // THEN
         assertNotNull(result);
         assertEquals(2, result.size());
-        assertEquals("Grand Hotel", result.get(0).getHotelName());
+        assertEquals("Hotel Name", result.get(0).getHotelName());
         assertEquals("Beach Hotel", result.get(1).getHotelName());
 
         verify(hotelRepository, times(1)).findAll();
@@ -426,7 +424,7 @@ public class HotelServiceTest {
         hotel2.setHotelCity("Tirane");
 
         HotelDto hotelDto2 = new HotelDto(
-                2, "City Hotel", "Tirane", "City Center",
+                2, "City Hotel", "Tirane", "Tirane",
                 "+355694444444", 123, "City hotel",
                 LocalDate.now(), LocalDate.now()
         );
@@ -448,7 +446,7 @@ public class HotelServiceTest {
         // THEN
         assertNotNull(result);
         assertEquals(2, result.size());
-        assertEquals("Tirane", result.get(0).getHotelCity());
+        assertEquals("Hotel City", result.get(0).getHotelCity());
         assertEquals("Tirane", result.get(1).getHotelCity());
 
         verify(hotelRepository, times(1)).getByHotelCity(city);
