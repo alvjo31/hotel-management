@@ -12,15 +12,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class RoomDto {
-    @Column(nullable = false)
+
     private Integer number;
     private Integer capacity;
     private Double price;
-    @Column(nullable = false)
     private BookingStatus status;
-    @Column(nullable = false)
     private int maxGuests;
     private double pricePerNight;
-
 
 }

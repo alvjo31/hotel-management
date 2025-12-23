@@ -42,6 +42,16 @@ public class Hotel {
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Room> rooms = new ArrayList<>();
+    @PrePersist
+    protected void onCreate() {
+        createdDate = LocalDate.now();
+        updatedDate = LocalDate.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedDate = LocalDate.now();
+    }
 
 
 }

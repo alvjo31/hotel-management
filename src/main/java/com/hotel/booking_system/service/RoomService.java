@@ -33,6 +33,9 @@ public class RoomService {
     public RoomDto addRoom(RoomDto roomDto) {
         checkRoom(roomDto);
         Room room = roomDtoMapper.fromDto(roomDto);
+    if (room.getPrice() == null) {
+        room.setPrice(0.0);
+    }
         Room saved = roomRepository.save(room);
         return roomDtoMapper.apply(saved);
 
@@ -62,14 +65,23 @@ public class RoomService {
         checkRoom(roomDto);
 
         Room updated = roomRepository.findById(id).orElseThrow(() -> new ResourceNotFindException("Room with ID " + id + " not found."));
-        updated.setNumber(roomDto.getNumber());
-        updated.setCapacity(roomDto.getCapacity());
+
+        if (roomDto.getNumber() != null) {
+            updated.setNumber(roomDto.getNumber());
+        }
+        if (roomDto.getCapacity() != null) {
+            updated.setCapacity(roomDto.getCapacity());
+        }
+        if (roomDto.getPrice() != null) {
+            updated.setPrice(roomDto.getPrice());
+        }
+        if (roomDto.getMaxGuests() > 0) {
+            updated.setMaxGuests(roomDto.getMaxGuests());
+        }
+        if (roomDto.getPricePerNight() > 0) {
+            updated.setPricePerNight(roomDto.getPricePerNight());
+        }
         updated.setBookingStatus(BookingStatus.CONFIRMED);
-        updated.setPrice(roomDto.getPrice());
-        updated.setMaxGuests(roomDto.getMaxGuests());
-        updated.setPricePerNight(roomDto.getPricePerNight());
-        updated.setHotel(updated.getHotel());
-        Room updatedRoom = roomRepository.save(updated);
         return roomDtoMapper.apply(updated);
 
     }

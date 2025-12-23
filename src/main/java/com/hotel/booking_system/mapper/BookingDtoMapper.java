@@ -1,6 +1,7 @@
 package com.hotel.booking_system.mapper;
 
 import com.hotel.booking_system.dto.BookingDto;
+import com.hotel.booking_system.exceptions.ResourceNotFindException;
 import com.hotel.booking_system.model.Booking;
 import com.hotel.booking_system.repository.BookingRepository;
 import com.hotel.booking_system.repository.GuestRepository;
@@ -49,8 +50,14 @@ public class BookingDtoMapper implements Function<Booking, BookingDto> {
         Booking booking = new Booking();
         booking.setCheckInDate(bookingDto.getCheckInDate());
         booking.setCheckoutDate(bookingDto.getCheckOutDate());
-        booking.setPrice(bookingDto.getPrice());
+        booking.setNumberOfGuests(bookingDto.getNumberOfGuests());
         booking.setBookingStatus(bookingDto.getBookingStatus());
+
+        // Vendos room dhe guest
+        booking.setRoom(roomRepository.findById(bookingDto.getRoomId())
+                .orElseThrow(() -> new ResourceNotFindException("Room not found")));
+        booking.setGuest(guestRepository.findById(bookingDto.getGuestId())
+                .orElseThrow(() -> new ResourceNotFindException("Guest not found")));
         return booking;
     }
 }

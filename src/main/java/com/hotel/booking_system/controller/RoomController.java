@@ -18,17 +18,27 @@ public class RoomController {
 
     private final RoomService roomService;
 
-    @Autowired
+
     public RoomController(RoomService roomService) {
         this.roomService = roomService;
     }
 
     @PostMapping
-    public ResponseEntity<RoomDto> saveRoom(RoomDto roomDto) {
+    public ResponseEntity<RoomDto> saveRoom(@RequestBody RoomDto roomDto) {
         RoomDto created = roomService.addRoom(roomDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<List<RoomDto>> getRoomByHotelNumber(@PathVariable Integer id) {
+        List<RoomDto> rooms = roomService.getRoomsByHotelNumber(id);
+        if (rooms == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } else {
+            return ResponseEntity.ok(rooms);
+
+        }
+    }
 
     @GetMapping("/get/allrooms")
     public ResponseEntity<List<RoomDto>> getAllRooms(@RequestParam(required = false) Integer hotelNumber) {
@@ -40,9 +50,9 @@ public class RoomController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RoomDto> updateRoom(@PathVariable Integer id , @RequestBody RoomDto roomDto) {
+    public ResponseEntity<RoomDto> updateRoom(@PathVariable Integer id, @RequestBody RoomDto roomDto) {
         RoomDto updatedRoom = roomService.updateRoom(id, roomDto);
-            return ResponseEntity.ok(updatedRoom);
+        return ResponseEntity.ok(updatedRoom);
     }
 
     @DeleteMapping("/{id}")

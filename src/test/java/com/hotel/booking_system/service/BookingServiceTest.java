@@ -172,7 +172,7 @@ public class BookingServiceTest {
         // WHEN and  THEN
         DuplicateResourceException exception = assertThrows(DuplicateResourceException.class,
                 () -> bookingService.addBooking(bookingDto));
-        assertTrue(exception.getMessage().contains("Guest ka rezervime"));
+        assertTrue(exception.getMessage().contains("Guest ka rezervime të mëparshme në këtë hotel."));
 
     }
 

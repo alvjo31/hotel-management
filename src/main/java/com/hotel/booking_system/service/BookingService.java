@@ -10,12 +10,15 @@ import com.hotel.booking_system.model.Room;
 import com.hotel.booking_system.enums.BookingStatus;
 import com.hotel.booking_system.mapper.BookingDtoMapper;
 import com.hotel.booking_system.repository.BookingRepository;
+import com.hotel.booking_system.repository.GuestRepository;
 import com.hotel.booking_system.repository.RoomRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,29 +28,42 @@ public class BookingService {
     private BookingRepository bookingRepository;
     private BookingDtoMapper bookingDtoMapper;
     private RoomRepository roomRepository;
+    private GuestRepository guestRepository;
 
 
     @Autowired
-    public BookingService(BookingRepository bookingRepository, BookingDtoMapper bookingDtoMapper, RoomRepository roomRepository) {
+    public BookingService(BookingRepository bookingRepository, BookingDtoMapper bookingDtoMapper, RoomRepository roomRepository, GuestRepository guestRepository) {
         this.bookingRepository = bookingRepository;
         this.bookingDtoMapper = bookingDtoMapper;
         this.roomRepository = roomRepository;
+        this.guestRepository = guestRepository;
     }
 
     @Transactional
     public BookingDto addBooking(BookingDto bookingDto) {
 
         validateDates(bookingDto.getCheckInDate(), bookingDto.getCheckOutDate());
-        isRoomAvailable(bookingDto.getRoomId(), bookingDto.getCheckInDate(), bookingDto.getCheckOutDate());
         checkNumberOfGuets(bookingDto.getNumberOfGuests());
-        validateDates(bookingDto.getCheckInDate(), bookingDto.getCheckOutDate());
         validateRoomCapacity(bookingDto.getRoomId(), bookingDto.getNumberOfGuests());
-        // Krijimi i objektit Booking nga BookingDto dhe validimi i statusit
-        Booking booking = bookingDtoMapper.fromDto(bookingDto); // Krijo një Booking nga BookingDto
-        validateBookingStatus(booking);
-        // Kontrollo statusin e rezervimit
         Room room = roomRepository.findById(bookingDto.getRoomId())
                 .orElseThrow(() -> new ResourceNotFindException("Room not found with ID: " + bookingDto.getRoomId()));
+        isRoomAvailable(bookingDto.getRoomId(), bookingDto.getCheckInDate(), bookingDto.getCheckOutDate());// Krijimi i objektit Booking nga BookingDto dhe validimi i statusit
+        Booking booking = bookingDtoMapper.fromDto(bookingDto);
+        booking.setRoom(room);
+        booking.setGuest(
+                guestRepository.findById(bookingDto.getGuestId())
+                        .orElseThrow(() -> new ResourceNotFindException("Guest not found"))
+        );
+        long numberOfNights = java.time.temporal.ChronoUnit.DAYS.between(bookingDto.getCheckInDate(), bookingDto.getCheckOutDate());
+        double price = calculatePrice(room, bookingDto.getNumberOfGuests(), numberOfNights);
+        booking.setBookingStatus(bookingDto.getBookingStatus() != null
+                ? bookingDto.getBookingStatus()
+                : BookingStatus.CONFIRMED);
+        booking.setCreatedDate(java.time.LocalDateTime.now());
+        booking.setUpdatedDate(java.time.LocalDateTime.now());
+// Krijo një Booking nga BookingDto
+        validateBookingStatus(booking);
+        // Kontrollo statusin e rezervimit
 
         Integer hotelId = room.getHotel().getId();
         // 3. Kontrollo historikun e guest
@@ -62,16 +78,6 @@ public class BookingService {
         }
 
 
-        long numberOfNights = java.time.temporal.ChronoUnit.DAYS.between(bookingDto.getCheckInDate(), bookingDto.getCheckOutDate());
-        double price = calculatePrice(room, bookingDto.getNumberOfGuests(), numberOfNights);
-        // Vendos çmimin dhe statusin e rezervimit
-        booking.setPrice(price);
-        booking.setBookingStatus(bookingDto.getBookingStatus() != null
-                        ? bookingDto.getBookingStatus()
-                        : BookingStatus.CONFIRMED);
-        booking.setCreatedDate(java.time.LocalDateTime.now());
-        booking.setUpdatedDate(java.time.LocalDateTime.now());
-
         // Ruaj rezervimin në bazën e të dhënave
         bookingRepository.save(booking);
 
@@ -81,7 +87,6 @@ public class BookingService {
     }
 
 
-    // Find bookings for the room that overlap with the given check-in and check-out dates
     public boolean isRoomAvailable(Integer roomId, LocalDate checkInDate, LocalDate checkOutDate) {
         List<Booking> overlappingBookings = bookingRepository.findByRoom_IdAndCheckInDateLessThanAndCheckoutDateGreaterThan(roomId, checkInDate, checkOutDate);
 
@@ -164,11 +169,9 @@ public class BookingService {
     }
 
     public List<BookingDto> findAllBooking() {
-        return Optional.of(bookingRepository.findAll())
-                .filter(list -> !list.isEmpty())
-                .map(list -> list.stream()
-                        .map(bookingDtoMapper)
-                        .toList())
-                .orElseThrow(() -> new ResourceNotFindException("Nuk ka rezervime ne sistem."));
+        return bookingRepository.findAll()
+                .stream()
+                .map(bookingDtoMapper)
+                .toList();
     }
 }

@@ -25,10 +25,11 @@ public class Room {
     @Column(nullable = false)
     private Integer capacity;
     @Column(nullable = false)
-    private Double price;
+    private Double price = 0.0;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING) // ose STRING
-    private BookingStatus bookingStatus;
+    private BookingStatus bookingStatus = BookingStatus.PENDING;
     @Column(nullable = false)
     private int maxGuests;
     @Column(nullable = false)

@@ -138,7 +138,7 @@ public class GuestService {
                 throw new BadRequestException("Invalid email format");
             }
         }
-        if (guestDto.getPhone() == null && isValidPhone(guestDto.getPhone())) {
+        if (guestDto.getPhone() != null && isValidPhone(guestDto.getPhone())) {
             {
                 throw new BadRequestException("Invalid phone format");
             }

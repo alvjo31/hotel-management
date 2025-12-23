@@ -33,7 +33,7 @@ public class BookingController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    @PutMapping("/update/booking")
+    @PutMapping("/{id}")
     public ResponseEntity <BookingDto> updateBooking( @PathVariable Integer id ,@RequestBody BookingDto bookingDto) {
         BookingDto updated = bookingService.updateBookingDto(id, bookingDto);
         return ResponseEntity.ok(updated);
