@@ -1,9 +1,11 @@
 package com.hotel.booking_system.service;
 
+import com.hotel.booking_system.dto.HotelDto;
 import com.hotel.booking_system.dto.RoomDto;
 import com.hotel.booking_system.enums.BookingStatus;
 import com.hotel.booking_system.exceptions.BadRequestException;
 import com.hotel.booking_system.exceptions.ResourceNotFindException;
+import com.hotel.booking_system.model.Hotel;
 import com.hotel.booking_system.model.Room;
 import com.hotel.booking_system.mapper.RoomDtoMapper;
 import com.hotel.booking_system.repository.BookingRepository;
@@ -19,23 +21,31 @@ import java.util.List;
 @Service
 public class RoomService {
 
-    private RoomRepository roomRepository;
-    private RoomDtoMapper roomDtoMapper;
+    private final RoomRepository roomRepository;
+    private final RoomDtoMapper roomDtoMapper;
+    private final HotelRepository hotelRepository;
 
 
     @Autowired
-    public RoomService(RoomRepository roomRepository, RoomDtoMapper roomDtoMapper) {
+    public RoomService(RoomRepository roomRepository, RoomDtoMapper roomDtoMapper, HotelRepository hotelRepository) {
         this.roomRepository = roomRepository;
         this.roomDtoMapper = roomDtoMapper;
+        this.hotelRepository = hotelRepository;
     }
 
-@Transactional
-    public RoomDto addRoom(RoomDto roomDto) {
+    @Transactional
+    public RoomDto addRoomToHotel(RoomDto roomDto, Integer hotelId) {
         checkRoom(roomDto);
+        Hotel hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() ->
+                        new ResourceNotFindException("Hotel me ID " + hotelId + " nuk ekziston"));
+
+
         Room room = roomDtoMapper.fromDto(roomDto);
-    if (room.getPrice() == null) {
-        room.setPrice(0.0);
-    }
+        if (room.getPrice() == null) {
+            room.setPrice(0.0);
+        }
+        room.setHotel(hotel);
         Room saved = roomRepository.save(room);
         return roomDtoMapper.apply(saved);
 

@@ -20,4 +20,5 @@ public class RoomDto {
     private int maxGuests;
     private double pricePerNight;
 
+
 }

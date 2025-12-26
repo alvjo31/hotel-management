@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/review")
+@RequestMapping("/api/hotels/{hotelId}/guests/{guestId}/reviews")
 public class ReviewController {
 
     private final ReviewService reviewService;
@@ -26,7 +26,7 @@ public class ReviewController {
         return ResponseEntity.ok(reviewDtos);
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ReviewDto> getReviewById(@PathVariable int id) {
         ReviewDto getAll =  reviewService.getReviewbyId(id);
         return ResponseEntity.ok().body(getAll);
@@ -34,18 +34,18 @@ public class ReviewController {
 
 
     @PostMapping
-    public ResponseEntity<ReviewDto> createReview(@RequestBody ReviewDto reviewDto , Integer hotelId ,Integer guestId) {
+    public ResponseEntity<ReviewDto> createReview(@RequestBody ReviewDto reviewDto , @PathVariable Integer hotelId , @PathVariable Integer guestId) {
         ReviewDto createReview = reviewService.addReview( reviewDto , hotelId, guestId );
         return ResponseEntity.status(HttpStatus.CREATED).body(createReview);
     }
 
-    @PutMapping("{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<ReviewDto> updateReview(@PathVariable int id, @RequestBody ReviewDto reviewDto ,Integer hotelId ,Integer guestId) {
         ReviewDto updateReview = reviewService.updateReview(id ,reviewDto ,hotelId,guestId);
         return ResponseEntity.ok().body(updateReview);
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public void deleteReview(@PathVariable int id) {
         reviewService.deleteReview(id);
     }

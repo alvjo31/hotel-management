@@ -39,8 +39,8 @@ public class BookingController {
         return ResponseEntity.ok(updated);
     }
 
-    @GetMapping("/get/booksbyid")
-    public ResponseEntity <BookingDto> getBookingByID(@RequestParam Integer id) {
+    @GetMapping("/getbooksbyid/{id}")
+    public ResponseEntity <BookingDto> getBookingByID(@PathVariable Integer id) {
         BookingDto bookingDto = bookingService.getBookingDtoById(id);
         return ResponseEntity.ok(bookingDto);
     }

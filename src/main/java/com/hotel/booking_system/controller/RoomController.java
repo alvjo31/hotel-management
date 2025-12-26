@@ -23,9 +23,9 @@ public class RoomController {
         this.roomService = roomService;
     }
 
-    @PostMapping
-    public ResponseEntity<RoomDto> saveRoom(@RequestBody RoomDto roomDto) {
-        RoomDto created = roomService.addRoom(roomDto);
+    @PostMapping("/hotels/{hotelId}/rooms")
+    public ResponseEntity<RoomDto> saveRoom(@PathVariable Integer hotelId , @RequestBody RoomDto roomDto) {
+        RoomDto created = roomService.addRoomToHotel(roomDto, hotelId);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 

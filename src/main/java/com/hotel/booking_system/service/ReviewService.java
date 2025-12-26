@@ -6,6 +6,8 @@ import com.hotel.booking_system.exceptions.DuplicateResourceException;
 import com.hotel.booking_system.exceptions.ResourceNotFindException;
 import com.hotel.booking_system.mapper.ReviewDtoMapper;
 import com.hotel.booking_system.model.Booking;
+import com.hotel.booking_system.model.Guest;
+import com.hotel.booking_system.model.Hotel;
 import com.hotel.booking_system.model.Review;
 import com.hotel.booking_system.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +18,6 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class ReviewService {
@@ -24,15 +25,13 @@ public class ReviewService {
     private ReviewRepository reviewRepository;
     private ReviewDtoMapper reviewDtoMapper;
     private HotelRepository hotelRepository;
-    private RoomRepository roomRepository;
     private BookingRepository bookingRepository;
 
     @Autowired
-    public ReviewService(ReviewRepository reviewRepository, ReviewDtoMapper reviewDtoMapper, HotelRepository hotelRepository, RoomRepository roomRepository, GuestRepository guestRepository,BookingRepository bookingRepository)  {
+    public ReviewService(ReviewRepository reviewRepository, ReviewDtoMapper reviewDtoMapper, HotelRepository hotelRepository, GuestRepository guestRepository, BookingRepository bookingRepository) {
         this.reviewRepository = reviewRepository;
         this.reviewDtoMapper = reviewDtoMapper;
         this.hotelRepository = hotelRepository;
-        this.roomRepository = roomRepository;
         this.guestRepository = guestRepository;
         this.bookingRepository = bookingRepository;
     }
@@ -40,13 +39,22 @@ public class ReviewService {
     @Transactional
     public ReviewDto addReview(ReviewDto reviewDto, Integer hotelId, Integer guestId) {
         validateReview(reviewDto);
-        validateHotelAndGuest(hotelId, guestId);
-        guestStayedInHotel(hotelId, guestId);
-        validateNoplicateReview(guestId ,hotelId);
-        validateReviewTiming(guestId,hotelId);
+
+
+        Hotel hotel = hotelRepository.findById(hotelId).orElseThrow(() -> new ResourceNotFindException("Hotel not found"));
+        Guest guest = guestRepository.findById(guestId).orElseThrow(() -> new ResourceNotFindException("Guest not found"));
+
+        Booking booking = bookingRepository.findTopByGuest_IdAndRoom_Hotel_IdOrderByCheckoutDateDesc(guestId, hotelId)
+                .orElseThrow(() -> new ResourceNotFindException("Booking not found"));
+        if (booking.getCheckoutDate().isAfter(LocalDate.now())) {
+            throw new BadRequestException("Nuk mund te lesh review perpara check out.");
+        }
+        validateDuplicateReview(guestId ,hotelId);
+        validateReviewTiming(guestId, hotelId);
+
         Review review = reviewDtoMapper.fromDto(reviewDto);
-        review.setGuest(guestRepository.findById(guestId).orElseThrow(() -> new ResourceNotFindException("Guest not found")));
-        review.setHotel(hotelRepository.findById(hotelId).orElseThrow(() -> new ResourceNotFindException("Hotel not found")));
+        review.setGuest(guest);
+        review.setHotel(hotel);
         Review saved = reviewRepository.save(review);
         return reviewDtoMapper.apply(saved);
     }
@@ -65,42 +73,23 @@ public class ReviewService {
         if (reviewDto.getComment().length() > 1000) {
             throw new BadRequestException("Komenti nuk duhet te jete me shume se 1000 karaktere");
         }
-        if (reviewDto.getDate() == null && reviewDto.getDate().after(new Date())) {
-            throw new BadRequestException("Data nuk mund te jete en te ardhmen");
-        }
-    }
-
-    private void validateHotelAndGuest(Integer hotelId, Integer guestId) {
-        if (hotelId == null) {
-            throw new BadRequestException("Hotel ID nuk mund te jete bosh");
+        if (reviewDto.getDate() == null) {
+            throw new BadRequestException("Data nuk mund te jete bosh");
         }
 
-        if (guestId == null) {
-            throw new BadRequestException("Guest ID nuk mund te jete bosh");
+        if (reviewDto.getDate().after(new Date())) {
+            throw new BadRequestException("Data nuk mund te jete ne te ardhmen");
         }
-
-        if (!hotelRepository.existsById(hotelId)) {
-            throw new ResourceNotFindException("Hotel me id " + hotelId + " nuk ekziston");
-        }
-
-        if (!guestRepository.existsById(guestId)) {
-            throw new ResourceNotFindException("Guest me id " + guestId + " nuk ekziston");
-        }
-    }
-
-    public void guestStayedInHotel(Integer guestId, Integer hotelId) {
-        boolean stayedInHotel = bookingRepository.existsByGuest_IdAndRoom_Hotel_IdAndCheckoutDateBefore(guestId , hotelId ,LocalDate.now());
-            if (!stayedInHotel) {
-                throw new BadRequestException("Guest nuk mund te le review pa qendruar ne hotel");
-            }
 
     }
 
-
-    private void validateNoplicateReview(Integer guestId, Integer hotelId) {
-        boolean alreadyReviewd = reviewRepository.existsByGuestIdAndHotelId(guestId, hotelId);
-        if (alreadyReviewd) {
-            throw new DuplicateResourceException("Keni lene nje review tashme");
+    private void validateDuplicateReview(Integer guestId, Integer hotelId) {
+        boolean alreadyReviewed =
+                reviewRepository.existsByGuestIdAndHotelId(guestId, hotelId);
+        if (alreadyReviewed) {
+            throw new DuplicateResourceException(
+                    "Guest ka lënë tashmë një review për këtë hotel"
+            );
         }
     }
 
@@ -121,7 +110,6 @@ public class ReviewService {
     public ReviewDto updateReview(Integer reviewId, ReviewDto reviewDto, Integer hotelId, Integer guestId) {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new ResourceNotFindException("Review not found"));
         validateReview(reviewDto);
-        validateHotelAndGuest(hotelId, guestId);
         // perditesimin e vlerave
 
         review.setRating(reviewDto.getRating());
@@ -147,7 +135,7 @@ public class ReviewService {
 
     @Transactional
     public void deleteReview(Integer reviewId) {
-        if (reviewRepository.existsById(reviewId)) {
+        if (!reviewRepository.existsById(reviewId)) {
             throw new ResourceNotFindException("Review not found");
         }
         reviewRepository.deleteById(reviewId);

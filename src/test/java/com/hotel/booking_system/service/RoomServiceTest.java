@@ -1,10 +1,13 @@
 package com.hotel.booking_system.service;
 
+import com.hotel.booking_system.dto.HotelDto;
 import com.hotel.booking_system.dto.RoomDto;
 import com.hotel.booking_system.exceptions.BadRequestException;
 import com.hotel.booking_system.exceptions.ResourceNotFindException;
 import com.hotel.booking_system.mapper.RoomDtoMapper;
+import com.hotel.booking_system.model.Hotel;
 import com.hotel.booking_system.model.Room;
+import com.hotel.booking_system.repository.HotelRepository;
 import com.hotel.booking_system.repository.RoomRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +28,8 @@ public class RoomServiceTest {
     private RoomRepository roomRepository;
     @Mock
     private RoomDtoMapper roomDtoMapper;
+    @Mock
+    private HotelRepository hotelRepository;
     @InjectMocks
     RoomService roomService;
 
@@ -53,12 +58,16 @@ public class RoomServiceTest {
     @Test
     void addRoom_ShouldSaveRoom_WhenDataIsValid() {
         // GIVEN
+        Integer hotelId = 1;
+        Hotel hotel = new Hotel();
+        hotel.setId(hotelId);
+        when(hotelRepository.findById(hotelId)).thenReturn(Optional.of(hotel));
         when(roomDtoMapper.fromDto(roomDto)).thenReturn(room);
         when(roomRepository.save(room)).thenReturn(room);
         when(roomDtoMapper.apply(room)).thenReturn(roomDto);
 
         // WHEN
-        RoomDto result = roomService.addRoom(roomDto);
+        RoomDto result = roomService.addRoomToHotel(roomDto, hotelId);
 
         // THEN
         assertNotNull(result);
@@ -68,11 +77,12 @@ public class RoomServiceTest {
     @Test
     void addRoom_ShouldThrowException_WhenRoomNumberIsInvalid() {
         // GIVEN
+        Integer hotelId = 1;
         roomDto.setNumber(0);
 
         // WHEN + THEN
         assertThrows(ResourceNotFindException.class,
-                () -> roomService.addRoom(roomDto));
+                () -> roomService.addRoomToHotel(roomDto ,hotelId));
 
         verify(roomRepository, never()).save(any());
     }
