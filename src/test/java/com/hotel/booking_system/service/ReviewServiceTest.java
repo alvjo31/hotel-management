@@ -211,9 +211,9 @@ class ReviewServiceTest {
     // -------------------------
     @Test
     void deleteReview_shouldThrow_whenNotExists() {
-        when(reviewRepository.existsById(1)).thenReturn(false);
+        when(reviewRepository.findById(1)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFindException.class,
-                () -> reviewService.deleteReview(1));
+                () -> reviewService.deleteReview(1 ,3 , 2));
     }
 }

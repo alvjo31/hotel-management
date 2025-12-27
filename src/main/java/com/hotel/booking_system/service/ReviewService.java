@@ -111,6 +111,13 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new ResourceNotFindException("Review not found"));
         validateReview(reviewDto);
         // perditesimin e vlerave
+        if (!review.getGuest().getId().equals(guestId)) {
+            throw new BadRequestException("Nuk lejohet të modifikoni këtë review");
+        }
+
+        if (!review.getHotel().getId().equals(hotelId)) {
+            throw new BadRequestException("Review nuk i përket këtij hoteli");
+        }
 
         review.setRating(reviewDto.getRating());
         review.setComment(reviewDto.getComment());
@@ -134,10 +141,19 @@ public class ReviewService {
     }
 
     @Transactional
-    public void deleteReview(Integer reviewId) {
-        if (!reviewRepository.existsById(reviewId)) {
-            throw new ResourceNotFindException("Review not found");
+    public void deleteReview(Integer reviewId, Integer guestId, Integer hotelId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResourceNotFindException("Review not found"));
+
+        if (!review.getGuest().getId().equals(guestId)) {
+            throw new BadRequestException("Nuk lejohet të fshini këtë review");
         }
-        reviewRepository.deleteById(reviewId);
+
+        if (!review.getHotel().getId().equals(hotelId)) {
+            throw new BadRequestException("Review nuk i përket këtij hoteli");
+        }
+
+        reviewRepository.delete(review);
     }
+
 }
