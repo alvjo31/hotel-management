@@ -127,10 +127,9 @@ public class GuestService {
     // Validation for update
 
     private void validateGuestDtoForUpdate(GuestDto guestDto) throws BadRequestException {
-        if (guestDto.getLastName() != null) {
-            if (guestDto.getLastName().trim().isEmpty()) {
+        if (guestDto.getLastName() == null || guestDto.getLastName().trim().isEmpty()) {
                 throw new BadRequestException("Last name cannot be empty");
-            }
+
         }
 
         if (guestDto.getEmail() != null && !isValidEmail(guestDto.getEmail())) {

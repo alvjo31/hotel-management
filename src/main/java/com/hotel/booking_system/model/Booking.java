@@ -16,18 +16,18 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class Booking {
-   @Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-   @Column(nullable = false)
-   private LocalDate checkInDate;
+    @Column(nullable = false)
+    private LocalDate checkInDate;
 
     @Column(nullable = false)
-   private LocalDate checkoutDate;
+    private LocalDate checkoutDate;
 
     @Column(nullable = false)
-   private double price;
+    private double price;
 
     @Column(nullable = false)
     private Integer numberOfGuests;
@@ -41,26 +41,26 @@ public class Booking {
     private LocalDateTime updatedDate;
 
 
-   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id" , nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_id", nullable = false)
     private Room room;
 
-   @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "guest_id" , nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "guest_id", nullable = false)
     private Guest guest;
 
-   @PrePersist
+    @PrePersist
     protected void onCreate() {
-     createdDate  = LocalDateTime.now();
-     updatedDate = LocalDateTime.now();
-   }
+        createdDate = LocalDateTime.now();
+        updatedDate = LocalDateTime.now();
+    }
 
-   @PreUpdate
+    @PreUpdate
     protected void onUpdate() {
-       updatedDate = LocalDateTime.now();
-   }
+        updatedDate = LocalDateTime.now();
+    }
 
-   public long calculateNumberOfNights(){
-       return java.time.temporal.ChronoUnit.DAYS.between(checkInDate, checkoutDate);
-   }
+    public long calculateNumberOfNights() {
+        return java.time.temporal.ChronoUnit.DAYS.between(checkInDate, checkoutDate);
+    }
 }

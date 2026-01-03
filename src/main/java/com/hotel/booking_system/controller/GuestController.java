@@ -1,11 +1,9 @@
 package com.hotel.booking_system.controller;
 
 import com.hotel.booking_system.dto.GuestDto;
-import com.hotel.booking_system.dto.HotelDto;
 import com.hotel.booking_system.service.GuestService;
-import com.hotel.booking_system.service.HotelService;
+import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,11 +11,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/guests")
+@RequestMapping("/api/v1/guest")
 public class GuestController {
-    private GuestService guestService;
+    private final GuestService guestService;
 
-    @Autowired
+
     public GuestController(GuestService guestService) {
         this.guestService = guestService;
     }
@@ -30,7 +28,7 @@ public class GuestController {
     }
 
     @PostMapping
-    public ResponseEntity<GuestDto> createGuest(@RequestBody GuestDto guestDto) throws BadRequestException {
+    public ResponseEntity<GuestDto> createGuest(@RequestBody @Valid GuestDto guestDto) throws BadRequestException {
         GuestDto createGuest = guestService.addGuest(guestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createGuest);
     }

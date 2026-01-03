@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 import java.util.function.Function;
 
 @Component
-
 @Builder
 public class GuestDtoMapper implements Function<Guest , GuestDto> {
+
     public GuestDto apply(Guest guest) {
         return new GuestDto(guest.getId(), guest.getFirstName(),guest.getLastName(),
                 guest.getEmail(),guest.getPhone());

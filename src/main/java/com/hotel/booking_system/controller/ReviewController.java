@@ -10,12 +10,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/hotels/{hotelId}/guests/{guestId}/reviews")
+@RequestMapping("/api/v1/review")
 public class ReviewController {
 
     private final ReviewService reviewService;
 
-    @Autowired
+
     public ReviewController(ReviewService reviewService) {
         this.reviewService = reviewService;
     }
@@ -33,8 +33,10 @@ public class ReviewController {
     }
 
 
-    @PostMapping
-    public ResponseEntity<ReviewDto> createReview(@RequestBody ReviewDto reviewDto, @PathVariable Integer hotelId, @PathVariable Integer guestId) {
+    @PostMapping("/{hotelId}/{guestId}")
+    public ResponseEntity<ReviewDto> createReview(@RequestBody ReviewDto reviewDto,
+                                                  @PathVariable Integer hotelId,
+                                                  @PathVariable Integer guestId) {
         ReviewDto createReview = reviewService.addReview(reviewDto, hotelId, guestId);
         return ResponseEntity.status(HttpStatus.CREATED).body(createReview);
     }
@@ -50,7 +52,7 @@ public class ReviewController {
         return ResponseEntity.ok().body(updateReview);
     }
 
-    @DeleteMapping("/{reviewId}")
+    @DeleteMapping("/{reviewId}/{guestId}")
     public ResponseEntity<Void> deleteReview(
             @PathVariable Integer hotelId,
             @PathVariable Integer guestId,

@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
     }
 
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(NoClassDefFoundError.class)
     ResponseEntity<?>handleException(Exception ex){
         return ResponseEntity
                 .status(500)

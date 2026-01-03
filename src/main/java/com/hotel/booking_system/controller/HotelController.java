@@ -10,11 +10,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/hotels")
+@RequestMapping("/api/v1/hotel")
 public class HotelController {
     private final HotelService hotelService;
 
-    @Autowired
     public HotelController(HotelService hotelService) {
         this.hotelService = hotelService;
     }
