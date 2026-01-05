@@ -20,9 +20,9 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(NoClassDefFoundError.class)
-    ResponseEntity<?>handleException(Exception ex){
+    ResponseEntity<?>handleException(NoClassDefFoundError ex){
         return ResponseEntity
-                .status(500)
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error" ,"Internal Server Error",
                         "message", "Dicka shkoi gabim"));
     }
