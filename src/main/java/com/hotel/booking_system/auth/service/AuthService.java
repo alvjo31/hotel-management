@@ -21,7 +21,8 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public AuthResponse register(RegisterRequest request) {
+    // Regjistrimi me biznes logic për role
+    public AuthResponse register(RegisterRequest request, User currentUser) {
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             return new AuthResponse("Username already exists", null);
         }
@@ -30,10 +31,15 @@ public class AuthService {
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEnabled(true);
-        user.setRoles(request.getRoles() != null ? request.getRoles() : Collections.singletonList("ROLE_USER"));
+
+        // Logjika: Admin mund të caktojë role, user normal vetëm ROLE_USER
+        if (currentUser != null && currentUser.getRoles().contains("ROLE_ADMIN")) {
+            user.setRoles(request.getRoles() != null ? request.getRoles() : Collections.singletonList("ROLE_USER"));
+        } else {
+            user.setRoles(Collections.singletonList("ROLE_USER"));
+        }
 
         userRepository.save(user);
-
         return new AuthResponse("User registered successfully", user.getUsername());
     }
 
