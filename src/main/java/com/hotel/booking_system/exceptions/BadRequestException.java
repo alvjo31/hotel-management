@@ -2,7 +2,6 @@ package com.hotel.booking_system.exceptions;
 
 public class BadRequestException extends BaseException{
 
-    //throw new BadRequestException("Check-in date cannot be in the past");
 
     public BadRequestException(String message) {
         super(message , 400 , "Bad Request");

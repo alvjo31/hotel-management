@@ -48,8 +48,6 @@ public class Room {
     }
 
 
-    //Nëse atributi price është një Double, duhet të jeni të sigurt se price.intValue() është përdorur saktë. Nëse ndonjëherë price është null
-    // , mund të shkaktoni një NullPointerException. Një mundësi është që të kontrolloni që price nuk është null:
     public double getPricePerNight(){
         if (pricePerNight < 0) {
             throw new IllegalArgumentException("Price cannot be null.");
