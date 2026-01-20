@@ -2,25 +2,32 @@ package com.hotel.booking_system.mapper;
 
 import com.hotel.booking_system.dto.GuestDto;
 import com.hotel.booking_system.model.Guest;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Function;
 
+/**
+ * Mapper for converting between Guest entity and GuestDto
+ */
 @Component
-@Builder
-public class GuestDtoMapper implements Function<Guest , GuestDto> {
+public class GuestDtoMapper implements Function<Guest, GuestDto> {
 
+    @Override
     public GuestDto apply(Guest guest) {
-        return new GuestDto(guest.getId(), guest.getFirstName(),guest.getLastName(),
-                guest.getEmail(),guest.getPhone());
+        return GuestDto.builder()
+                .guestId(guest.getId())
+                .firstName(guest.getFirstName())
+                .lastName(guest.getLastName())
+                .email(guest.getEmail())
+                .phone(guest.getPhone())
+                .build();
     }
 
     public Guest fromDto(GuestDto guestDto) {
         Guest guest = new Guest();
-        guest.setId(guestDto.getId());
+        if (guestDto.getGuestId() != null) {
+            guest.setId(guestDto.getGuestId());
+        }
         guest.setFirstName(guestDto.getFirstName());
         guest.setLastName(guestDto.getLastName());
         guest.setEmail(guestDto.getEmail());

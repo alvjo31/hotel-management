@@ -40,6 +40,8 @@ public class BookingServiceTest {
     private BookingDtoMapper bookingDtoMapper;
     @Mock
     private RoomRepository roomRepository;
+    @Mock
+    private GuestRepository guestRepository;
 
     @InjectMocks
     private BookingService bookingService;
@@ -48,6 +50,7 @@ public class BookingServiceTest {
     private BookingDto bookingDto;
     private Room room;
     private Hotel hotel;
+    private Guest guest;
 
 
     @BeforeEach
@@ -55,7 +58,6 @@ public class BookingServiceTest {
         bookingDto = new BookingDto();
         bookingDto.setRoomId(10);
         bookingDto.setGuestId(20);
-        ;
         bookingDto.setCheckInDate(LocalDate.now().plusDays(1));
         bookingDto.setCheckOutDate(LocalDate.now().plusDays(4));
         bookingDto.setNumberOfGuests(2);
@@ -63,6 +65,11 @@ public class BookingServiceTest {
 
         hotel = new Hotel();
         hotel.setId(1);
+
+        guest = new Guest();
+        guest.setId(20);
+        guest.setFirstName("John");
+        guest.setLastName("Doe");
 
         room = mock(Room.class);
         lenient().when(room.getHotel()).thenReturn(hotel);
@@ -93,6 +100,7 @@ public class BookingServiceTest {
         )).thenReturn(false);
 
         when(roomRepository.findById(bookingDto.getRoomId())).thenReturn(Optional.of(room));
+        when(guestRepository.findById(bookingDto.getGuestId())).thenReturn(Optional.of(guest));
 
 
         // GIVEN: Mapper konverton DTO në Booking
@@ -106,7 +114,7 @@ public class BookingServiceTest {
                         .checkInDate(bookingDto.getCheckInDate())
                         .checkOutDate(bookingDto.getCheckOutDate())
                         .numberOfGuests(bookingDto.getNumberOfGuests())
-                        .bookingStatus(BookingStatus.CONFIRMED)
+                        .status(BookingStatus.CONFIRMED)
                         .build()
         );
 
@@ -122,7 +130,7 @@ public class BookingServiceTest {
 
         // THEN: Verifikojmë rezultat
         assertNotNull(result);
-        assertEquals(BookingStatus.CONFIRMED, result.getBookingStatus());
+        assertEquals(BookingStatus.CONFIRMED, result.getStatus());
         assertEquals(2, result.getNumberOfGuests());
 
         verify(roomRepository, atLeast(1)).findById(eq(bookingDto.getRoomId()));
@@ -160,6 +168,7 @@ public class BookingServiceTest {
     void addBooking_ShouldThrowDuplicateResourceException_WhenGuestHasOldBooking() {
         // GIVEN: RoomRepository gjen dhomën
         when(roomRepository.findById(bookingDto.getRoomId())).thenReturn(Optional.of(room));
+        when(guestRepository.findById(bookingDto.getGuestId())).thenReturn(Optional.of(guest));
 
         when(bookingDtoMapper.fromDto(bookingDto)).thenReturn(booking);
 
@@ -216,12 +225,14 @@ public class BookingServiceTest {
         @Test
         void addBooking_throwsInvalidBookingStatus_whenCancelled() {
             // GIVEN
-            booking.setBookingStatus(BookingStatus.CANCELLED);
+            bookingDto.setStatus(BookingStatus.CANCELLED);
             when(bookingDtoMapper.fromDto(bookingDto)).thenReturn(booking);
             when(roomRepository.findById(bookingDto.getRoomId()))
                     .thenReturn(Optional.of(room));
+            when(guestRepository.findById(bookingDto.getGuestId()))
+                    .thenReturn(Optional.of(guest));
 
-            // validateBookingStatus ndodh para roomRepository.findById(...)
+            // validateBookingStatus happens after status is set from DTO
             // WHEN + THEN
             assertThrows(InvalidBookingStatusException.class, () -> bookingService.addBooking(bookingDto));
 
@@ -234,6 +245,8 @@ public class BookingServiceTest {
             // GIVEN
             when(roomRepository.findById(bookingDto.getRoomId()))
                     .thenReturn(Optional.of(room));
+            when(guestRepository.findById(bookingDto.getGuestId()))
+                    .thenReturn(Optional.of(guest));
 
             when(bookingRepository.findByRoom_IdAndCheckInDateLessThanAndCheckoutDateGreaterThan(
                     anyInt(), any(LocalDate.class), any(LocalDate.class)
@@ -274,12 +287,17 @@ public class BookingServiceTest {
         }
 
         @Test
-        void findAllBooking_throwsResourceNotFound_whenEmpty() {
+        void findAllBooking_returnsEmptyList_whenEmpty() {
             // GIVEN
             when(bookingRepository.findAll()).thenReturn(List.of());
 
-            // WHEN + THEN
-            assertThrows(ResourceNotFindException.class, () -> bookingService.findAllBooking());
+            // WHEN
+            List<BookingDto> result = bookingService.findAllBooking();
+
+            // THEN
+            assertNotNull(result);
+            assertTrue(result.isEmpty());
+            assertEquals(0, result.size());
             verify(bookingRepository, times(1)).findAll();
     }
 }

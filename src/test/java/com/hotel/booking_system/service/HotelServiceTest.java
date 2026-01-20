@@ -7,14 +7,12 @@ import com.hotel.booking_system.exceptions.ResourceNotFindException;
 import com.hotel.booking_system.mapper.HotelDtoMapper;
 import com.hotel.booking_system.model.Hotel;
 import com.hotel.booking_system.repository.HotelRepository;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -51,16 +49,17 @@ public class HotelServiceTest {
         hotel.setUpdatedDate(LocalDate.of(2024, 1, 1));
 
 
-        hotelDto = new HotelDto(1
-                , "Hotel Name"
-                , "Hotel Address"
-                , "Hotel City"
-                , "Hotel Description"
-                , 123
-                , "Hotel Email"
-                , LocalDate.of(2024, 1, 1),
-                LocalDate.of(2024, 1, 1)
-        );
+        hotelDto = HotelDto.builder()
+                .hotelId(1)
+                .name("Hotel Name")
+                .address("Hotel Address")
+                .city("Hotel City")
+                .description("Hotel Description")
+                .phone("123")
+                .email("Hotel Email")
+                .createdAt(LocalDate.of(2024, 1, 1).atStartOfDay())
+                .updatedAt(LocalDate.of(2024, 1, 1).atStartOfDay())
+                .build();
 
     }
 
@@ -78,12 +77,12 @@ public class HotelServiceTest {
         //then -- verifikimi
 
         assertNotNull(result);
-        assertEquals("Hotel Name", result.getHotelName());
-        assertEquals("Hotel Address", result.getHotelAddress());
-        assertEquals("Hotel City", result.getHotelCity());
-        assertEquals("Hotel Description", result.getHotelDescription());
-        assertEquals(123, result.getHotelPhone());
-        assertEquals("Hotel Email", result.getHotelEmail());
+        assertEquals("Hotel Name", result.getName());
+        assertEquals("Hotel Address", result.getAddress());
+        assertEquals("Hotel City", result.getCity());
+        assertEquals("Hotel Description", result.getDescription());
+        assertEquals("123", result.getPhone());
+        assertEquals("Hotel Email", result.getEmail());
         assertEquals(1, result.getHotelId());
 
         verify(hotelRepository, times(1)).findById(hotelId);
@@ -120,7 +119,7 @@ public class HotelServiceTest {
 
         // THEN
         assertNotNull(result);
-        assertEquals("Hotel Name", result.getHotelName());
+        assertEquals("Hotel Name", result.getName());
         verify(hotelRepository, times(1)).getByHotelName(hotelName);
         verify(hotelDtoMapper, times(1)).apply(hotel);
     }
@@ -129,17 +128,15 @@ public class HotelServiceTest {
     @Test
     void testAddHotel_WithEmptyName_ThrowsBadRequestException() {
         // GIVEN
-        HotelDto invalidDto = new HotelDto(
-                null,
-                "",  // Emër bosh
-                "Tirane",
-                "Rruga X",
-                "+355691111111",
-                123,
-                "Pershkrim",
-                null,
-                null
-        );
+        HotelDto invalidDto = HotelDto.builder()
+                .hotelId(null)
+                .name("")  // Emër bosh
+                .city("Tirane")
+                .address("Rruga X")
+                .phone("+355691111111")
+                .description("Pershkrim")
+                .email("test@test.com")
+                .build();
         // WHEN & THEN
         BadRequestException exception = assertThrows(
                 BadRequestException.class,
@@ -153,17 +150,15 @@ public class HotelServiceTest {
     @Test
     void testAddHotel_WithNullName_ThrowsBadRequestException() {
         // GIVEN
-        HotelDto invalidDto = new HotelDto(
-                null,
-                null,
-                "Tirane",
-                "Rruga X",
-                "+355691111111",
-                123,
-                "Pershkrim",
-                null,
-                null
-        );
+        HotelDto invalidDto = HotelDto.builder()
+                .hotelId(null)
+                .name(null)
+                .city("Tirane")
+                .address("Rruga X")
+                .phone("+355691111111")
+                .description("Pershkrim")
+                .email("test@test.com")
+                .build();
 
         // WHEN & THEN
         BadRequestException exception = assertThrows(
@@ -177,17 +172,15 @@ public class HotelServiceTest {
     @Test
     void testAddHotel_WithEmptyCity_ThrowsBadRequestException() {
         // GIVEN
-        HotelDto invalidDto = new HotelDto(
-                1,
-                "Hotel Name",
-                "Hotel Adress",
-                "",
-                "+355691111111",
-                123,
-                        "Pershkrim",
-                        null,
-                        null
-                        );
+        HotelDto invalidDto = HotelDto.builder()
+                .hotelId(1)
+                .name("Hotel Name")
+                .address("Hotel Address")
+                .city("")
+                .phone("+355691111111")
+                .description("Pershkrim")
+                .email("test@test.com")
+                .build();
 
     // WHEN & THEN
     BadRequestException exception = assertThrows(
@@ -202,17 +195,15 @@ public class HotelServiceTest {
     @Test
     void testAddHotel_WithDuplicateName_ThrowsDuplicateResourceException() {
         // GIVEN
-        HotelDto duplicateDto = new HotelDto(
-                null,
-                "Grand Hotel",
-                "Tirane",
-                "Rruga X",
-                "+355691111111",
-                123,
-                "Pershkrim",
-                null,
-                null
-        );
+        HotelDto duplicateDto = HotelDto.builder()
+                .hotelId(null)
+                .name("Grand Hotel")
+                .city("Tirane")
+                .address("Rruga X")
+                .phone("+355691111111")
+                .description("Pershkrim")
+                .email("test@test.com")
+                .build();
 
         when(hotelRepository.getByHotelName("Grand Hotel"))
                 .thenReturn(Optional.of(hotel));
@@ -231,17 +222,17 @@ public class HotelServiceTest {
     void testUpdateHotel_WithValidData_ReturnsUpdatedHotelDto() {
         // GIVEN
         int hotelId = 1;
-        HotelDto updatedDto = new HotelDto(
-                1,
-                "Grand Hotel Updated",
-                "Rruga e Re 456",
-                "Tirane",
-                "+355691234567",
-                123,
-                "Hotel i perditesuar",
-                LocalDate.of(2024, 1, 1),
-                LocalDate.now()
-        );
+        HotelDto updatedDto = HotelDto.builder()
+                .hotelId(1)
+                .name("Grand Hotel Updated")
+                .address("Rruga e Re 456")
+                .city("Tirane")
+                .phone("69123456")
+                .description("Hotel i perditesuar")
+                .email("updated@test.com")
+                .createdAt(LocalDate.of(2024, 1, 1).atStartOfDay())
+                .updatedAt(LocalDate.now().atStartOfDay())
+                .build();
 
         when(hotelRepository.findById(hotelId))
                 .thenReturn(Optional.of(hotel));
@@ -265,17 +256,17 @@ public class HotelServiceTest {
     void testUpdateHotel_WhenHotelDoesNotExist_ThrowsException() {
         // GIVEN
         int hotelId = 999;
-        HotelDto updatedDto = new HotelDto(
-                999,
-                "Hotel Name",
-                "Tirane",
-                "Address",
-                "+355691234567",
-                123,
-                "Description",
-                LocalDate.now(),
-                LocalDate.now()
-        );
+        HotelDto updatedDto = HotelDto.builder()
+                .hotelId(999)
+                .name("Hotel Name")
+                .city("Tirane")
+                .address("Address")
+                .phone("+355691234567")
+                .description("Description")
+                .email("test@test.com")
+                .createdAt(LocalDate.now().atStartOfDay())
+                .updatedAt(LocalDate.now().atStartOfDay())
+                .build();
 
         when(hotelRepository.findById(hotelId))
                 .thenReturn(Optional.empty());
@@ -294,17 +285,17 @@ public class HotelServiceTest {
     void testUpdateHotel_WithEmptyName_ThrowsBadRequestException() {
         // GIVEN
         int hotelId = 1;
-        HotelDto invalidDto = new HotelDto(
-                1,
-                "",  // Emër bosh
-                "Tirane",
-                "Address",
-                "+355691234567",
-                123,
-                "Description",
-                LocalDate.now(),
-                LocalDate.now()
-        );
+        HotelDto invalidDto = HotelDto.builder()
+                .hotelId(1)
+                .name("")  // Emër bosh
+                .city("Tirane")
+                .address("Address")
+                .phone("+355691234567")
+                .description("Description")
+                .email("test@test.com")
+                .createdAt(LocalDate.now().atStartOfDay())
+                .updatedAt(LocalDate.now().atStartOfDay())
+                .build();
 
         // WHEN & THEN
         BadRequestException exception = assertThrows(
@@ -364,11 +355,17 @@ public class HotelServiceTest {
         hotel2.setHotelName("Beach Hotel");
         hotel2.setHotelCity("Sarande");
 
-        HotelDto hotelDto2 = new HotelDto(
-                2, "Beach Hotel", "Sarande", "Sarande",
-                "+355693333333", 123, "Beach@gmail.com",
-                LocalDate.now(), LocalDate.now()
-        );
+        HotelDto hotelDto2 = HotelDto.builder()
+                .hotelId(2)
+                .name("Beach Hotel")
+                .city("Sarande")
+                .address("Sarande")
+                .phone("+355693333333")
+                .description("Beach hotel")
+                .email("Beach@gmail.com")
+                .createdAt(LocalDate.now().atStartOfDay())
+                .updatedAt(LocalDate.now().atStartOfDay())
+                .build();
 
         List<Hotel> hotels = Arrays.asList(hotel, hotel2);
 
@@ -387,8 +384,8 @@ public class HotelServiceTest {
         // THEN
         assertNotNull(result);
         assertEquals(2, result.size());
-        assertEquals("Hotel Name", result.get(0).getHotelName());
-        assertEquals("Beach Hotel", result.get(1).getHotelName());
+        assertEquals("Hotel Name", result.get(0).getName());
+        assertEquals("Beach Hotel", result.get(1).getName());
 
         verify(hotelRepository, times(1)).findAll();
         verify(hotelDtoMapper, times(2)).apply(any(Hotel.class));
@@ -423,11 +420,17 @@ public class HotelServiceTest {
         hotel2.setHotelName("City Hotel");
         hotel2.setHotelCity("Tirane");
 
-        HotelDto hotelDto2 = new HotelDto(
-                2, "City Hotel", "Tirane", "Tirane",
-                "+355694444444", 123, "City hotel",
-                LocalDate.now(), LocalDate.now()
-        );
+        HotelDto hotelDto2 = HotelDto.builder()
+                .hotelId(2)
+                .name("City Hotel")
+                .city("Tirane")
+                .address("Tirane")
+                .phone("+355694444444")
+                .description("City hotel")
+                .email("city@test.com")
+                .createdAt(LocalDate.now().atStartOfDay())
+                .updatedAt(LocalDate.now().atStartOfDay())
+                .build();
 
         List<Hotel> hotelsInCity = Arrays.asList(hotel, hotel2);
 
@@ -446,8 +449,8 @@ public class HotelServiceTest {
         // THEN
         assertNotNull(result);
         assertEquals(2, result.size());
-        assertEquals("Hotel City", result.get(0).getHotelCity());
-        assertEquals("Tirane", result.get(1).getHotelCity());
+        assertEquals("Hotel City", result.get(0).getCity());
+        assertEquals("Tirane", result.get(1).getCity());
 
         verify(hotelRepository, times(1)).getByHotelCity(city);
         verify(hotelDtoMapper, times(2)).apply(any(Hotel.class));
@@ -471,6 +474,3 @@ public class HotelServiceTest {
         verify(hotelRepository, times(1)).getByHotelCity(city);
     }
 }
-
-
-

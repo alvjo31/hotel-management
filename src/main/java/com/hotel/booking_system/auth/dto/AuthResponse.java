@@ -1,19 +1,26 @@
 package com.hotel.booking_system.auth.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+/**
+ * Response DTO for authentication operations
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AuthResponse {
+
     private String message;
     private String username;
-
-    public AuthResponse() {}
-
-    public AuthResponse(String message, String username) {
-        this.message = message;
-        this.username = username;
-    }
-
-    public String getMessage() { return message; }
-    public void setMessage(String message) { this.message = message; }
-
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    private String token;
+    private List<String> roles;
+    private Long expiresIn; // Token expiration time in milliseconds
 }

@@ -2,9 +2,10 @@ package com.hotel.booking_system.controller;
 
 import com.hotel.booking_system.dto.ReviewDto;
 import com.hotel.booking_system.service.ReviewService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,7 +15,6 @@ import java.util.List;
 public class ReviewController {
 
     private final ReviewService reviewService;
-
 
     public ReviewController(ReviewService reviewService) {
         this.reviewService = reviewService;
@@ -27,32 +27,34 @@ public class ReviewController {
     }
 
     @GetMapping("/{reviewId}")
-    public ResponseEntity<ReviewDto> getReviewById(@PathVariable int id) {
-        ReviewDto getAll = reviewService.getReviewbyId(id);
+    public ResponseEntity<ReviewDto> getReviewById(@PathVariable int reviewId) {
+        ReviewDto getAll = reviewService.getReviewbyId(reviewId);
         return ResponseEntity.ok().body(getAll);
     }
 
-
     @PostMapping("/{hotelId}/{guestId}")
-    public ResponseEntity<ReviewDto> createReview(@RequestBody ReviewDto reviewDto,
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'MANAGER')")
+    public ResponseEntity<ReviewDto> createReview(@Valid @RequestBody ReviewDto reviewDto,
                                                   @PathVariable Integer hotelId,
                                                   @PathVariable Integer guestId) {
         ReviewDto createReview = reviewService.addReview(reviewDto, hotelId, guestId);
         return ResponseEntity.status(HttpStatus.CREATED).body(createReview);
     }
 
-    @PutMapping("/{reviewId}")
+    @PutMapping("/{hotelId}/{guestId}/{reviewId}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'MANAGER')")
     public ResponseEntity<ReviewDto> updateReview(
             @PathVariable Integer hotelId,
             @PathVariable Integer guestId,
             @PathVariable Integer reviewId,
-            @RequestBody ReviewDto reviewDto
+            @Valid @RequestBody ReviewDto reviewDto
     ) {
         ReviewDto updateReview = reviewService.updateReview(reviewId, reviewDto, hotelId, guestId);
         return ResponseEntity.ok().body(updateReview);
     }
 
-    @DeleteMapping("/{reviewId}/{guestId}")
+    @DeleteMapping("/{hotelId}/{guestId}/{reviewId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<Void> deleteReview(
             @PathVariable Integer hotelId,
             @PathVariable Integer guestId,

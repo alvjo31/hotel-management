@@ -46,6 +46,8 @@ class ReviewServiceTest {
     private ReviewDto reviewDto;
     private Review review;
     private Booking booking;
+    private com.hotel.booking_system.model.Hotel hotel;
+    private com.hotel.booking_system.model.Guest guest;
 
     private Integer hotelId = 1;
     private Integer guestId = 2;
@@ -55,7 +57,7 @@ class ReviewServiceTest {
         reviewDto = new ReviewDto();
         reviewDto.setRating(5.0);
         reviewDto.setComment("Great hotel!");
-        reviewDto.setDate(new Date());
+        reviewDto.setReviewDate(java.time.LocalDateTime.now());
 
         review = new Review();
         review.setRating(5.0);
@@ -64,6 +66,12 @@ class ReviewServiceTest {
 
         booking = new Booking();
         booking.setCheckoutDate(LocalDate.now().minusDays(10));
+
+        hotel = new com.hotel.booking_system.model.Hotel();
+        hotel.setId(hotelId);
+
+        guest = new com.hotel.booking_system.model.Guest();
+        guest.setId(guestId);
     }
 
     // -------------------------
@@ -72,18 +80,14 @@ class ReviewServiceTest {
     @Test
     void addReview_shouldReturnReviewDto_whenValid() {
         // GIVEN
-        when(hotelRepository.existsById(hotelId)).thenReturn(true);
-        when(guestRepository.existsById(guestId)).thenReturn(true);
-
-        when(bookingRepository.existsByGuest_IdAndRoom_Hotel_IdAndCheckoutDateBefore(
-                eq(guestId), eq(hotelId), any(LocalDate.class)
-        )).thenReturn(true);
-
-        when(reviewRepository.existsByGuestIdAndHotelId(guestId, hotelId)).thenReturn(false);
+        when(hotelRepository.findById(hotelId)).thenReturn(Optional.of(hotel));
+        when(guestRepository.findById(guestId)).thenReturn(Optional.of(guest));
 
         when(bookingRepository.findTopByGuest_IdAndRoom_Hotel_IdOrderByCheckoutDateDesc(
                 guestId, hotelId
         )).thenReturn(Optional.of(booking));
+
+        when(reviewRepository.existsByGuestIdAndHotelId(guestId, hotelId)).thenReturn(false);
 
         when(reviewDtoMapper.fromDto(reviewDto)).thenReturn(review);
         when(reviewRepository.save(review)).thenReturn(review);
@@ -116,7 +120,7 @@ class ReviewServiceTest {
     // -------------------------
     @Test
     void addReview_shouldThrowResourceNotFound_whenHotelNotExists() {
-        when(hotelRepository.existsById(hotelId)).thenReturn(false);
+        when(hotelRepository.findById(hotelId)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFindException.class,
                 () -> reviewService.addReview(reviewDto, hotelId, guestId));
@@ -127,14 +131,14 @@ class ReviewServiceTest {
     // -------------------------
     @Test
     void addReview_shouldThrowBadRequest_whenGuestDidNotStayInHotel() {
-        when(hotelRepository.existsById(hotelId)).thenReturn(true);
-        when(guestRepository.existsById(guestId)).thenReturn(true);
+        when(hotelRepository.findById(hotelId)).thenReturn(Optional.of(hotel));
+        when(guestRepository.findById(guestId)).thenReturn(Optional.of(guest));
 
-        when(bookingRepository.existsByGuest_IdAndRoom_Hotel_IdAndCheckoutDateBefore(
-                eq(guestId), eq(hotelId), any(LocalDate.class)
-        )).thenReturn(false);
+        when(bookingRepository.findTopByGuest_IdAndRoom_Hotel_IdOrderByCheckoutDateDesc(
+                guestId, hotelId
+        )).thenReturn(Optional.empty());
 
-        assertThrows(BadRequestException.class,
+        assertThrows(ResourceNotFindException.class,
                 () -> reviewService.addReview(reviewDto, hotelId, guestId));
     }
 
@@ -143,12 +147,12 @@ class ReviewServiceTest {
     // -------------------------
     @Test
     void addReview_shouldThrowDuplicate_whenAlreadyReviewed() {
-        when(hotelRepository.existsById(hotelId)).thenReturn(true);
-        when(guestRepository.existsById(guestId)).thenReturn(true);
+        when(hotelRepository.findById(hotelId)).thenReturn(Optional.of(hotel));
+        when(guestRepository.findById(guestId)).thenReturn(Optional.of(guest));
 
-        when(bookingRepository.existsByGuest_IdAndRoom_Hotel_IdAndCheckoutDateBefore(
-                eq(guestId), eq(hotelId), any(LocalDate.class)
-        )).thenReturn(true);
+        when(bookingRepository.findTopByGuest_IdAndRoom_Hotel_IdOrderByCheckoutDateDesc(
+                guestId, hotelId
+        )).thenReturn(Optional.of(booking));
 
         when(reviewRepository.existsByGuestIdAndHotelId(guestId, hotelId)).thenReturn(true);
 
@@ -163,12 +167,9 @@ class ReviewServiceTest {
     void addReview_shouldThrowBadRequest_whenReviewTooLate() {
         booking.setCheckoutDate(LocalDate.now().minusDays(400));
 
-        when(hotelRepository.existsById(hotelId)).thenReturn(true);
-        when(guestRepository.existsById(guestId)).thenReturn(true);
+        when(hotelRepository.findById(hotelId)).thenReturn(Optional.of(hotel));
+        when(guestRepository.findById(guestId)).thenReturn(Optional.of(guest));
 
-        when(bookingRepository.existsByGuest_IdAndRoom_Hotel_IdAndCheckoutDateBefore(
-                eq(guestId), eq(hotelId), any(LocalDate.class)
-        )).thenReturn(true);
 
         when(reviewRepository.existsByGuestIdAndHotelId(guestId, hotelId)).thenReturn(false);
 

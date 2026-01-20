@@ -53,7 +53,7 @@ public class HotelService {
 @Transactional
     public HotelDto addHotel(HotelDto hotelDto) {
         validationHotelNameDto(hotelDto);
-        hotelNameIsUnique(hotelDto.getHotelName());
+        hotelNameIsUnique(hotelDto.getName());
 
         Hotel hotel = hotelDtoMapper.fromDto(hotelDto);
 
@@ -68,11 +68,11 @@ public class HotelService {
 
     // si fillim validon qe emri mos te jete bosh
     private void validationHotelNameDto(HotelDto hotelDto) {
-        if (hotelDto.getHotelName() == null || hotelDto.getHotelName().trim().isEmpty()) {
+        if (hotelDto.getName() == null || hotelDto.getName().trim().isEmpty()) {
             throw new BadRequestException("Emri i hotelit eshte i detyrueshem" );
         }
         // validon qe qyteti mos te jete bosh
-        if (hotelDto.getHotelCity() == null || hotelDto.getHotelCity().trim().isEmpty()) {
+        if (hotelDto.getCity() == null || hotelDto.getCity().trim().isEmpty()) {
             throw new BadRequestException("Qyteti i hotelit eshte i detyrueshem");
         }
     }
@@ -89,14 +89,23 @@ public class HotelService {
     public HotelDto updateHotel(Integer id, HotelDto hotelDto) {
         validationHotelNameDto(hotelDto);
         Hotel existingHotel = hotelRepository.findById(id).orElseThrow(() -> new ResourceNotFindException("Hotel me ID " + id + " nuk ekziston"));
-        existingHotel.setHotelCity(hotelDto.getHotelCity());
-        existingHotel.setHotelName(hotelDto.getHotelName());
-        existingHotel.setHotelAddress(hotelDto.getHotelAddress());
-        existingHotel.setHotelDescription(hotelDto.getHotelDescription());
-        existingHotel.setHotelEmail(hotelDto.getHotelEmail());
-        existingHotel.setHotelPhone(hotelDto.getHotelPhone());
-        existingHotel.setCreatedDate(hotelDto.getCreatedDate());
-        existingHotel.setUpdatedDate(hotelDto.getUpdatedDate());
+        existingHotel.setHotelCity(hotelDto.getCity());
+        existingHotel.setHotelName(hotelDto.getName());
+        existingHotel.setHotelAddress(hotelDto.getAddress());
+        existingHotel.setHotelDescription(hotelDto.getDescription());
+        existingHotel.setHotelEmail(hotelDto.getEmail());
+
+        // Convert String phone to Integer
+        if (hotelDto.getPhone() != null && !hotelDto.getPhone().trim().isEmpty()) {
+            try {
+                String digitsOnly = hotelDto.getPhone().replaceAll("[^0-9]", "");
+                existingHotel.setHotelPhone(Integer.parseInt(digitsOnly));
+            } catch (NumberFormatException e) {
+                throw new BadRequestException("Invalid phone number format: " + hotelDto.getPhone());
+            }
+        }
+
+        // Note: createdDate and updatedDate are managed by entity @PreUpdate
         return hotelDtoMapper.apply(existingHotel);
     }
 

@@ -50,7 +50,7 @@ public class GuestService {
     }
 
     @Transactional
-    public GuestDto addGuest(GuestDto guestDto) throws DuplicateResourceException {
+    public GuestDto addGuest(GuestDto guestDto) {
         validateGuesDto(guestDto);
         validateGuestDtoForUpdate(guestDto);
         validateUniqueEmail(guestDto.getEmail());
@@ -85,11 +85,11 @@ public class GuestService {
     }
 
     @Transactional
-    public GuestDto updateGuests(Integer id ,GuestDto guestDto) throws com.hotel.booking_system.exceptions.BadRequestException {
+    public GuestDto updateGuests(Integer id, GuestDto guestDto) {
         validateGuestDtoForUpdate(guestDto);
         Guest existinGguest = guestRepository
-                .findById(guestDto.getId())
-                .orElseThrow(() -> new ResourceNotFindException("Guest not found"));
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFindException("Guest not found with ID: " + id));
         validateUniqueEmail(guestDto.getEmail());
         if (hasActiveBookings(existinGguest)) {
             throw new DuplicateResourceException("Cannot update guest with active bookings");
@@ -100,7 +100,7 @@ public class GuestService {
     }
 
     // Basic validation
-    private void validateGuesDto(GuestDto guestDto) throws BadRequestException {
+    private void validateGuesDto(GuestDto guestDto) {
         if (guestDto.getFirstName() == null || guestDto.getFirstName().isEmpty()) {
             throw new BadRequestException("First name is required");
         }
@@ -126,21 +126,17 @@ public class GuestService {
 
     // Validation for update
 
-    private void validateGuestDtoForUpdate(GuestDto guestDto) throws BadRequestException {
+    private void validateGuestDtoForUpdate(GuestDto guestDto) {
         if (guestDto.getLastName() == null || guestDto.getLastName().trim().isEmpty()) {
                 throw new BadRequestException("Last name cannot be empty");
 
         }
 
         if (guestDto.getEmail() != null && !isValidEmail(guestDto.getEmail())) {
-            {
-                throw new BadRequestException("Invalid email format");
-            }
+            throw new BadRequestException("Invalid email format");
         }
         if (guestDto.getPhone() != null && !isValidPhone(guestDto.getPhone())) {
-            {
-                throw new BadRequestException("Invalid phone format");
-            }
+            throw new BadRequestException("Invalid phone format");
         }
     }
 

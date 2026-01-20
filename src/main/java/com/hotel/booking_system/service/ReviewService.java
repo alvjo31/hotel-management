@@ -9,23 +9,25 @@ import com.hotel.booking_system.model.Booking;
 import com.hotel.booking_system.model.Guest;
 import com.hotel.booking_system.model.Hotel;
 import com.hotel.booking_system.model.Review;
-import com.hotel.booking_system.repository.*;
+import com.hotel.booking_system.repository.BookingRepository;
+import com.hotel.booking_system.repository.GuestRepository;
+import com.hotel.booking_system.repository.HotelRepository;
+import com.hotel.booking_system.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.List;
 
 @Service
 public class ReviewService {
     private final GuestRepository guestRepository;
-    private ReviewRepository reviewRepository;
-    private ReviewDtoMapper reviewDtoMapper;
-    private HotelRepository hotelRepository;
-    private BookingRepository bookingRepository;
+    private final ReviewRepository reviewRepository;
+    private final ReviewDtoMapper reviewDtoMapper;
+    private final HotelRepository hotelRepository;
+    private final BookingRepository bookingRepository;
 
     @Autowired
     public ReviewService(ReviewRepository reviewRepository, ReviewDtoMapper reviewDtoMapper, HotelRepository hotelRepository, GuestRepository guestRepository, BookingRepository bookingRepository) {
@@ -73,11 +75,11 @@ public class ReviewService {
         if (reviewDto.getComment().length() > 1000) {
             throw new BadRequestException("Komenti nuk duhet te jete me shume se 1000 karaktere");
         }
-        if (reviewDto.getDate() == null) {
+        if (reviewDto.getReviewDate() == null) {
             throw new BadRequestException("Data nuk mund te jete bosh");
         }
 
-        if (reviewDto.getDate().after(new Date())) {
+        if (reviewDto.getReviewDate().isAfter(java.time.LocalDateTime.now())) {
             throw new BadRequestException("Data nuk mund te jete ne te ardhmen");
         }
 
@@ -121,7 +123,12 @@ public class ReviewService {
 
         review.setRating(reviewDto.getRating());
         review.setComment(reviewDto.getComment());
-        review.setDate(reviewDto.getDate());
+        // Convert LocalDateTime to Date for entity
+        if (reviewDto.getReviewDate() != null) {
+            review.setDate(java.util.Date.from(reviewDto.getReviewDate()
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .toInstant()));
+        }
         Review saved = reviewRepository.save(review);
         return reviewDtoMapper.apply(saved);
     }

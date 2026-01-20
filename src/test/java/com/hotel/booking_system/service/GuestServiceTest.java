@@ -49,6 +49,7 @@ public class GuestServiceTest {
         guest.setBookings(new ArrayList<>());
 
         guestDto = new GuestDto();
+        guestDto.setGuestId(1);
         guestDto.setFirstName("John");
         guestDto.setLastName("Doe");
         guestDto.setEmail("john@example.com" );
@@ -111,7 +112,7 @@ public class GuestServiceTest {
         GuestDto result = guestService.findGuestDtoById(1);
 
         assertNotNull(result);
-        assertEquals(1, result.getId());
+        assertEquals(1, result.getGuestId());
     }
 
     @Test
@@ -130,10 +131,10 @@ public class GuestServiceTest {
         booking.setBookingStatus(BookingStatus.CONFIRMED);
         guest.getBookings().add(booking);
 
-        when(guestRepository.findById(guestDto.getId())).thenReturn(Optional.of(guest));
+        when(guestRepository.findById(guestDto.getGuestId())).thenReturn(Optional.of(guest));
 
         assertThrows(DuplicateResourceException.class,
-                () -> guestService.updateGuests(guestDto.getId(), guestDto));
+                () -> guestService.updateGuests(guestDto.getGuestId(), guestDto));
     }
 
     // -------------------

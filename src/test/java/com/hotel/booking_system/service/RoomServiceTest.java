@@ -1,6 +1,6 @@
 package com.hotel.booking_system.service;
 
-import com.hotel.booking_system.dto.HotelDto;
+
 import com.hotel.booking_system.dto.RoomDto;
 import com.hotel.booking_system.exceptions.BadRequestException;
 import com.hotel.booking_system.exceptions.ResourceNotFindException;
@@ -39,17 +39,13 @@ public class RoomServiceTest {
     @BeforeEach
     void setUp() {
         room = new Room();
-        room = new Room();
         room.setId(1);
         room.setNumber(101);
-        room.setCapacity(2);
         room.setMaxGuests(2);
         room.setPricePerNight(50.0);
 
         roomDto = new RoomDto();
-        roomDto = new RoomDto();
-        roomDto.setNumber(101);
-        roomDto.setCapacity(2);
+        roomDto.setRoomNumber(101);
         roomDto.setMaxGuests(2);
         roomDto.setPricePerNight(50.0);
 
@@ -78,7 +74,7 @@ public class RoomServiceTest {
     void addRoom_ShouldThrowException_WhenRoomNumberIsInvalid() {
         // GIVEN
         Integer hotelId = 1;
-        roomDto.setNumber(0);
+        roomDto.setRoomNumber(0);
 
         // WHEN + THEN
         assertThrows(ResourceNotFindException.class,

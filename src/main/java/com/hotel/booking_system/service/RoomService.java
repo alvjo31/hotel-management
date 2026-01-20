@@ -42,9 +42,6 @@ public class RoomService {
 
 
         Room room = roomDtoMapper.fromDto(roomDto);
-        if (room.getPrice() == null) {
-            room.setPrice(0.0);
-        }
         room.setHotel(hotel);
         Room saved = roomRepository.save(room);
         return roomDtoMapper.apply(saved);
@@ -53,8 +50,8 @@ public class RoomService {
 
     // validim nese ekziston nr i dhomes
     public void checkRoom(RoomDto roomDto) {
-        if (roomDto.getNumber() == null || roomDto.getNumber() <= 0) {
-            throw new ResourceNotFindException("Dhoma me numer " + roomDto.getNumber() + " nuk ekziston");
+        if (roomDto.getRoomNumber() == null || roomDto.getRoomNumber() <= 0) {
+            throw new ResourceNotFindException("Dhoma me numer " + roomDto.getRoomNumber() + " nuk ekziston");
         }
     }
 
@@ -65,7 +62,7 @@ public class RoomService {
         }
         return roomRepository.findByHotelNumber(hotelNumber)
                 .stream()
-                .map(roomDtoMapper::apply)
+                .map(roomDtoMapper)
                 .peek(this::checkRoom) // mund ta përdorësh për validim
                 .toList();
     }
@@ -76,20 +73,16 @@ public class RoomService {
 
         Room updated = roomRepository.findById(id).orElseThrow(() -> new ResourceNotFindException("Room with ID " + id + " not found."));
 
-        if (roomDto.getNumber() != null) {
-            updated.setNumber(roomDto.getNumber());
+        if (roomDto.getRoomNumber() != null) {
+            updated.setNumber(roomDto.getRoomNumber());
         }
-        if (roomDto.getCapacity() != null) {
-            updated.setCapacity(roomDto.getCapacity());
-        }
-        if (roomDto.getPrice() != null) {
-            updated.setPrice(roomDto.getPrice());
-        }
-        if (roomDto.getMaxGuests() > 0) {
+        if (roomDto.getMaxGuests() != null && roomDto.getMaxGuests() > 0) {
             updated.setMaxGuests(roomDto.getMaxGuests());
+            updated.setCapacity(roomDto.getMaxGuests()); // Keep capacity in sync
         }
-        if (roomDto.getPricePerNight() > 0) {
+        if (roomDto.getPricePerNight() != null && roomDto.getPricePerNight() > 0) {
             updated.setPricePerNight(roomDto.getPricePerNight());
+            updated.setPrice(roomDto.getPricePerNight()); // Keep price in sync
         }
         updated.setBookingStatus(BookingStatus.CONFIRMED);
         return roomDtoMapper.apply(updated);

@@ -2,9 +2,10 @@ package com.hotel.booking_system.controller;
 
 import com.hotel.booking_system.dto.HotelDto;
 import com.hotel.booking_system.service.HotelService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,36 +20,37 @@ public class HotelController {
     }
 
     @GetMapping("/get/hotels")
-    public List<HotelDto> getAllHotels() {
-       return hotelService.getAllHotels();
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'MANAGER')")
+    public ResponseEntity<List<HotelDto>> getAllHotels() {
+       List<HotelDto> hotels = hotelService.getAllHotels();
+       return ResponseEntity.ok(hotels);
     }
 
-
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'MANAGER')")
     public ResponseEntity<HotelDto> getHotelById(@PathVariable int id) {
         HotelDto dto = hotelService.getHotelById(id);
         return ResponseEntity.ok(dto);
     }
 
-
-
-
     @PostMapping
-    public ResponseEntity<HotelDto> createHotel(@RequestBody HotelDto hotelDto) {
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    public ResponseEntity<HotelDto> createHotel(@Valid @RequestBody HotelDto hotelDto) {
         HotelDto created = hotelService.addHotel(hotelDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<HotelDto> updateHotel(@PathVariable int id, @RequestBody HotelDto hotelDto) {
-
-            HotelDto updated = hotelService.updateHotel(id, hotelDto);
-            return ResponseEntity.ok(updated);
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    public ResponseEntity<HotelDto> updateHotel(@PathVariable int id, @Valid @RequestBody HotelDto hotelDto) {
+        HotelDto updated = hotelService.updateHotel(id, hotelDto);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteHotel(@PathVariable int id) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteHotel(@PathVariable int id) {
         hotelService.deleteHotel(id);
+        return ResponseEntity.noContent().build();
     }
 }

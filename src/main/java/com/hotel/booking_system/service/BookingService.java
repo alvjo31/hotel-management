@@ -17,18 +17,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class BookingService {
-    //first comment
-    private BookingRepository bookingRepository;
-    private BookingDtoMapper bookingDtoMapper;
-    private RoomRepository roomRepository;
-    private GuestRepository guestRepository;
+    private final BookingRepository bookingRepository;
+    private final BookingDtoMapper bookingDtoMapper;
+    private final RoomRepository roomRepository;
+    private final GuestRepository guestRepository;
 
 
     @Autowired
@@ -56,8 +53,8 @@ public class BookingService {
         );
         long numberOfNights = java.time.temporal.ChronoUnit.DAYS.between(bookingDto.getCheckInDate(), bookingDto.getCheckOutDate());
         double price = calculatePrice(room, bookingDto.getNumberOfGuests(), numberOfNights);
-        booking.setBookingStatus(bookingDto.getBookingStatus() != null
-                ? bookingDto.getBookingStatus()
+        booking.setBookingStatus(bookingDto.getStatus() != null
+                ? bookingDto.getStatus()
                 : BookingStatus.CONFIRMED);
         booking.setCreatedDate(java.time.LocalDateTime.now());
         booking.setUpdatedDate(java.time.LocalDateTime.now());
@@ -143,10 +140,10 @@ public class BookingService {
         booking.setNumberOfGuests(bookingDto.getNumberOfGuests());
         booking.setCheckInDate(bookingDto.getCheckInDate());
         booking.setCheckoutDate(bookingDto.getCheckOutDate());
-        booking.setPrice(bookingDto.getPrice());
+        booking.setPrice(bookingDto.getTotalPrice());
         booking.setBookingStatus(
-                bookingDto.getBookingStatus() != null
-                        ? bookingDto.getBookingStatus()
+                bookingDto.getStatus() != null
+                        ? bookingDto.getStatus()
                         : BookingStatus.CONFIRMED
         );
 

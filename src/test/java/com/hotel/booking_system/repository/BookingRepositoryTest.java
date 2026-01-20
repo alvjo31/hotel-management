@@ -108,6 +108,8 @@ public class BookingRepositoryTest {
         booking.setCheckInDate(LocalDate.of(2025, 12, 30));
         booking.setCheckoutDate(LocalDate.of(2026, 1, 2));
         booking.setPrice(200.0);
+        booking.setBookingStatus(BookingStatus.CONFIRMED);
+        booking.setNumberOfGuests(2);
         bookingRepository.save(booking);
 
         List<Booking> result = bookingRepository.findByRoom_IdAndCheckInDateLessThanAndCheckoutDateGreaterThan(
@@ -150,6 +152,7 @@ public class BookingRepositoryTest {
         oldBooking.setCheckoutDate(LocalDate.of(2026, 03, 25));
         oldBooking.setPrice(150.0);
         oldBooking.setBookingStatus(BookingStatus.CONFIRMED);
+        oldBooking.setNumberOfGuests(2);
         bookingRepository.save(oldBooking);
 
         // --- Booking i fundit ---
@@ -160,6 +163,7 @@ public class BookingRepositoryTest {
         lastBooking.setCheckoutDate(LocalDate.of(2026, 07, 30));
         lastBooking.setPrice(200.0);
         lastBooking.setBookingStatus(BookingStatus.CONFIRMED);
+        lastBooking.setNumberOfGuests(3);
         bookingRepository.save(lastBooking);
 
         Optional<Booking> top = bookingRepository.findTopByGuest_IdAndRoom_Hotel_IdOrderByCheckoutDateDesc(
